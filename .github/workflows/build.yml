@@ -66,7 +66,7 @@ jobs:
         working-directory: frontend
 
       - name: Build Wails application
-        run: wails build --release
+        run: wails build
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

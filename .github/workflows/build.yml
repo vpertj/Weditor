@@ -66,7 +66,7 @@ jobs:
         working-directory: frontend
 
       - name: Build Wails application
-        run: wails build --production
+        run: wails build --release
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -101,6 +101,6 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            artifacts/build-windows-latest/build/windows/mdeditor.exe
-            artifacts/build-macos-latest/build/darwin/mdeditor.app
-            artifacts/build-ubuntu-latest/build/linux/mdeditor.AppImage
+            artifacts/build-windows-latest/build/windows/Weditor.exe
+            artifacts/build-macos-latest/build/darwin/Weditor.app
+            artifacts/build-ubuntu-latest/build/linux/Weditor.AppImage

@@ -1,0 +1,131 @@
+/* 精简的设计令牌系统 - 只保留实际使用的变量 */
+:root {
+  /* ===== 字体系统 ===== */
+  --font-size-xs: 12px;
+  --font-size-sm: 13px;
+  --font-size-base: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 32px;
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.6;
+
+  /* ===== 间距系统 ===== */
+  --spacing-xs: 4px;
+  --spacing-sm: 6px;
+  --spacing-md: 8px;
+  --spacing-lg: 12px;
+  --spacing-xl: 16px;
+  --spacing-2xl: 20px;
+  --spacing-3xl: 24px;
+  --spacing-4xl: 32px;
+  --spacing-5xl: 40px;
+  --spacing-6xl: 48px;
+  --spacing-toolbar: 36px;
+  --spacing-toolbar-mobile: 44px;
+
+  /* ===== 圆角系统 ===== */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-2xl: 12px;
+  --radius-3xl: 16px;
+  --radius-full: 9999px;
+
+  /* ===== 过渡动画系统 ===== */
+  --transition-fast: 150ms ease;
+  --transition-normal: 200ms ease;
+  --transition-slow: 300ms ease;
+  --transition-all-fast: all 150ms ease;
+  --transition-all-normal: all 200ms ease;
+  --transition-all-slow: all 300ms ease;
+
+  /* ===== 中性色系统 ===== */
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+
+  /* ===== 常用颜色 ===== */
+  --white: #ffffff;
+  --black: #000000;
+
+  /* ===== 按钮阴影（Neumorphism）===== */
+  --shadow-neumorphism-raised: 7px 7px 14px rgba(163, 177, 198, 0.7), -7px -7px 14px rgba(255, 255, 255, 0.9);
+  --shadow-neumorphism-pressed: inset 3px 3px 6px rgba(163, 177, 198, 0.4), inset -3px -3px 6px rgba(255, 255, 255, 0.8);
+  --shadow-neumorphism-small: 5px 5px 10px rgba(163, 177, 198, 0.7), -5px -5px 10px rgba(255, 255, 255, 0.9);
+
+  /* ===== 简单阴影 ===== */
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
+
+  /* ===== GitHub 按钮渐变 ===== */
+  --gradient-github: linear-gradient(135deg, #24292e 0%, #1a1e22 100%);
+  --gradient-github-hover: linear-gradient(135deg, #2f363d 0%, #24292e 100%);
+}
+
+/* ===== 基础重置样式 ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--theme-font-family);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  line-height: 1.5;
+  overflow-x: hidden;
+  /* 防止输入时高度变化导致的抖动 */
+  height: 100vh;
+  overflow-y: hidden;
+}
+
+/* ===== 基础工具组件 ===== */
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--gray-300);
+  border-radius: 50%;
+  border-top-color: var(--theme-primary);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== 基础交互样式 ===== */
+::selection {
+  background-color: var(--theme-primary-light);
+  color: var(--text-primary);
+}
+
+:focus-visible {
+  outline: 2px solid var(--theme-primary);
+  outline-offset: 2px;
+}

@@ -1,0 +1,274 @@
+/* 主题系统：默认（Default）
+ * 说明：所有规则作用于 .theme-system-default.modern-markdown 作用域，
+ * 与其它主题系统（如 wechat）完全隔离。
+ */
+
+
+/* 预览容器背景（默认系统：浅灰） */
+.preview-container.theme-system-default {
+  background: var(--gray-50);
+}
+
+/* 容器基础（可继承 default-theme.css 的基础变量） */
+.theme-system-default.modern-markdown {
+  color: var(--theme-text-primary);
+  background: var(--theme-bg-primary);
+  max-width: none;
+  padding: 2rem;
+}
+
+/* H1 现代化高级样式 - 光影渐变文字 + 精致下划线 */
+.theme-system-default.modern-markdown h1 {
+  margin: 1.8em 0 1.5em 0;
+  font-weight: 700;
+  font-size: calc(var(--markdown-font-size, 16px) * 2.2);
+  line-height: 1.3;
+  text-align: center;
+  position: relative;
+  padding-bottom: 0.8rem;
+  font-family: var(--markdown-font-family, var(--theme-font-family));
+
+  /* 渐变文字效果 */
+  background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-primary-dark) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+
+  /* 光影效果 */
+  text-shadow: 0 2px 4px var(--theme-primary-20);
+  filter: drop-shadow(0 1px 2px var(--theme-primary-15));
+
+  color: var(--theme-text-primary); /* 降级支持 */
+}
+
+/* H1 精致下划线 */
+.theme-system-default.modern-markdown h1::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent 0%, var(--theme-primary) 20%, var(--theme-primary) 80%, transparent 100%);
+  border-radius: 2px;
+  box-shadow: 0 2px 8px var(--theme-primary-40);
+}
+
+/* H2 优化样式 - 自然渐变竖线 */
+.theme-system-default.modern-markdown h2 {
+  margin-top: 2rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  padding-left: 0.5em;
+  font-size: calc(var(--markdown-font-size, 16px) * 1.5);
+  line-height: 1.4;
+  color: var(--theme-text-primary);
+  position: relative;
+  font-family: var(--markdown-font-family, var(--theme-font-family));
+}
+
+/* H2 自然渐变竖线 */
+.theme-system-default.modern-markdown h2::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 5px;
+  height: 1.1em;
+  background: linear-gradient(180deg,
+    var(--theme-primary-20) 0%,
+    var(--theme-primary-60) 15%,
+    var(--theme-primary) 35%,
+    var(--theme-primary) 65%,
+    var(--theme-primary-60) 85%,
+    var(--theme-primary-20) 100%
+  );
+  border-radius: 3px;
+  box-shadow: 0 0 6px var(--theme-primary-25);
+}
+
+/* H3-H6 样式 */
+.theme-system-default.modern-markdown h3 {
+  font-size: calc(var(--markdown-font-size, 16px) * 1.3);
+  font-weight: 600;
+  margin: 1.5rem 0 1rem 0;
+  color: var(--theme-text-primary);
+  font-family: var(--markdown-font-family, var(--theme-font-family));
+  line-height: var(--markdown-line-height, 1.6);
+}
+
+.theme-system-default.modern-markdown h4 {
+  font-size: calc(var(--markdown-font-size, 16px) * 1.1);
+  font-weight: 600;
+  margin: 1.2rem 0 0.8rem 0;
+  color: var(--theme-text-primary);
+  font-family: var(--markdown-font-family, var(--theme-font-family));
+  line-height: var(--markdown-line-height, 1.6);
+}
+
+.theme-system-default.modern-markdown h5 {
+  font-size: calc(var(--markdown-font-size, 16px) * 1);
+  font-weight: 600;
+  margin: 1rem 0 0.6rem 0;
+  color: var(--theme-text-primary);
+  font-family: var(--markdown-font-family, var(--theme-font-family));
+  line-height: var(--markdown-line-height, 1.6);
+}
+
+.theme-system-default.modern-markdown h6 {
+  font-size: calc(var(--markdown-font-size, 16px) * 0.9);
+  font-weight: 600;
+  margin: 0.8rem 0 0.5rem 0;
+  color: var(--theme-text-primary);
+  font-family: var(--markdown-font-family, var(--theme-font-family));
+  line-height: var(--markdown-line-height, 1.6);
+}
+
+/* 段落样式 */
+.theme-system-default.modern-markdown p {
+  margin: 1rem 0;
+  font-size: var(--markdown-font-size, 16px);
+  line-height: var(--markdown-line-height, 1.7);
+  font-weight: normal;
+  color: var(--theme-text-primary);
+  font-family: var(--markdown-font-family, var(--theme-font-family));
+}
+
+/* 引用块样式 */
+.theme-system-default.modern-markdown blockquote {
+  margin: 1.5rem 0;
+  padding: 1rem 1.5rem;
+  border-left: 4px solid var(--theme-primary);
+  background-color: var(--theme-bg-secondary);
+  color: var(--theme-text-secondary);
+  font-style: italic;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  font-size: var(--markdown-font-size, 16px);
+  font-family: var(--markdown-font-family, var(--theme-font-family));
+  line-height: var(--markdown-line-height, 1.6);
+}
+
+/* 列表样式 */
+.theme-system-default.modern-markdown ul,
+.theme-system-default.modern-markdown ol {
+  margin: 1rem 0;
+  padding-left: 2rem;
+  color: var(--theme-text-primary);
+  font-size: var(--markdown-font-size, 16px);
+  font-family: var(--markdown-font-family, var(--theme-font-family));
+  line-height: var(--markdown-line-height, 1.6);
+}
+
+.theme-system-default.modern-markdown li {
+  margin: 0.5rem 0;
+  font-size: var(--markdown-font-size, 16px);
+  font-family: var(--markdown-font-family, var(--theme-font-family));
+  line-height: var(--markdown-line-height, 1.6);
+}
+
+/* 代码样式 */
+.theme-system-default.modern-markdown code {
+  background-color: var(--theme-code-bg);
+  color: var(--theme-code-text);
+  padding: 0.2rem 0.4rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--theme-code-font-family);
+  font-size: 14px;
+  border: 1px solid var(--theme-code-border);
+}
+
+.theme-system-default.modern-markdown pre {
+  background-color: var(--code-bg, var(--theme-code-bg));
+  color: var(--code-color, var(--theme-code-text));
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  border: 1px solid var(--code-border, var(--theme-code-border));
+}
+
+.theme-system-default.modern-markdown pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  border: none;
+}
+
+/* 表格样式 */
+.theme-system-default.modern-markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.theme-system-default.modern-markdown th,
+.theme-system-default.modern-markdown td {
+  border: 1px solid var(--theme-border-light);
+  padding: 0.75rem;
+  text-align: left;
+  font-size: var(--markdown-font-size, 16px);
+  font-family: var(--markdown-font-family, var(--theme-font-family));
+  line-height: var(--markdown-line-height, 1.6);
+}
+
+.theme-system-default.modern-markdown th {
+  background-color: var(--theme-bg-secondary);
+  font-weight: 600;
+  color: var(--theme-text-primary);
+}
+
+.theme-system-default.modern-markdown td {
+  color: var(--theme-text-primary);
+}
+
+/* 链接样式 */
+.theme-system-default.modern-markdown a {
+  color: var(--theme-primary);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-bottom-color 0.2s ease;
+}
+
+.theme-system-default.modern-markdown a:hover {
+  border-bottom-color: var(--theme-primary);
+}
+
+/* 分割线 */
+.theme-system-default.modern-markdown hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--theme-border-light) 20%, var(--theme-border-light) 80%, transparent 100%);
+  margin: 2rem 0;
+}
+
+/* 强调文本 */
+.theme-system-default.modern-markdown strong {
+  font-weight: 600;
+  color: var(--theme-text-primary);
+}
+
+.theme-system-default.modern-markdown em {
+  font-style: italic;
+  color: var(--theme-text-secondary);
+}
+
+/* 删除线 */
+.theme-system-default.modern-markdown del {
+  text-decoration: line-through;
+  color: var(--theme-text-tertiary);
+}
+
+/* 图片样式 */
+.theme-system-default.modern-markdown img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin: 1rem 0;
+}
+

@@ -1,0 +1,289 @@
+/**
+ * @file src/core/editor/clipboard.js
+ * @description 剪贴板操作处理器
+ *
+ * 本文件封装了将 HTML 内容复制到系统剪贴板的复杂逻辑，
+ * 特别针对社交平台编辑器的怪异行为进行了优化。
+ *
+ * 主要功能:
+ * 1.  **富文本复制**: 核心功能 `copyToSocialClean` 旨在将一段 HTML 字符串
+ *     作为富文本（而不是纯文本）复制到剪贴板，这样粘贴到社交平台时能保留样式。
+ * 2.  **动态 DOM 操作**: 为了实现复制，它会动态创建一个临时的 `div` 元素，
+ *     将 HTML 内容注入其中，然后使用 `document.createRange` 和 `window.getSelection`
+ *     来选中这个 `div` 的内容。
+ * 3.  **渐进式增强与优雅降级**:
+ *     - 优先尝试使用现代的、异步的 `navigator.clipboard.write` API，
+ *       因为它更强大、更安全，并且能同时写入多种 MIME 类型（如 `text/html` 和 `text/plain`）。
+ *     - 如果 `clipboard.write` 失败（例如在不支持的浏览器或非 HTTPS 环境中），
+ *       会自动降级到传统的 `document.execCommand('copy')` 方法。
+ * 4.  **健壮性与错误处理**:
+ *     - 包含了超时机制，防止因内容过大或浏览器问题导致复制过程卡死。
+ *     - 提供了详细的错误信息，帮助用户理解复制失败的原因（如权限问题、内容过大等）。
+ * 5.  **社交平台特化容器**: `createRichTextContainer` 函数创建的容器带有一些特定的
+ *     CSS 样式，旨在模拟社交平台的环境，提高样式兼容性。
+ *
+ * 设计思想:
+ * - **封装复杂性**: 将与剪贴板交互的底层、繁琐且充满兼容性问题的代码封装起来，
+ *   对外提供一个简单的 `copyToSocialClean(html)` 接口。
+ * - **用户体验优先**: 尽管实现复杂，但目标是为用户提供一个"一键复制"的无缝体验。
+ *   超时和明确的错误提示都是为了改善用户体验。
+ * - **面向未来，兼容过去**: 优先使用现代 API，但保留了对旧 API 的支持，
+ *   确保了在更广泛的浏览器环境中可用。
+ */
+
+import {
+  TIMEOUTS,
+  CLIPBOARD_ERRORS,
+  EDITOR_CONFIG,
+} from '../../config/constants/index.js';
+import { ErrorHandler, ERROR_TYPES } from '../../shared/utils/error.js';
+
+/**
+ * 创建一个用于富文本复制的临时 DOM 容器。
+ * @param {string} html - 要放入容器的 HTML 内容。
+ * @param {Object} fontSettings - 字体设置对象（可选）
+ * @returns {HTMLDivElement} - 创建的 div 元素。
+ */
+function createRichTextContainer(html, fontSettings = null) {
+  const container = document.createElement('div');
+
+  // 获取字体设置 - 使用默认的微信兼容字体
+  let fontFamily = '"Microsoft YaHei", "微软雅黑", Arial, sans-serif'; // 默认使用微信兼容字体
+  let fontSize = `${EDITOR_CONFIG.FONT_SIZE}px`;
+  let lineHeight = EDITOR_CONFIG.LINE_HEIGHT;
+  let letterSpacing = 0;
+
+  if (fontSettings) {
+    try {
+      // 使用与coordinator.js一致的字体映射，微信公众号兼容版本
+      const fontFamilyMap = {
+        'microsoft-yahei': '"Microsoft YaHei", "微软雅黑", Arial, sans-serif',
+        'pingfang-sc': '"PingFang SC", "苹方-简", "Microsoft YaHei", "微软雅黑", Arial, sans-serif',
+        'hiragino-sans': '"Hiragino Sans GB", "冬青黑体简体中文", "Microsoft YaHei", "微软雅黑", Arial, sans-serif',
+        'arial': 'Arial, sans-serif',
+        'system-safe': '"Microsoft YaHei", "微软雅黑", "PingFang SC", "Hiragino Sans GB", Arial, sans-serif',
+        'system-default': '"Microsoft YaHei", "微软雅黑", "PingFang SC", "Hiragino Sans GB", Arial, sans-serif'
+      };
+
+      if (fontSettings.fontFamily && fontFamilyMap[fontSettings.fontFamily]) {
+        fontFamily = fontFamilyMap[fontSettings.fontFamily];
+      }
+      // 如果没有匹配的字体，保持默认的微信兼容字体
+
+      if (fontSettings.fontSize && typeof fontSettings.fontSize === 'number') {
+        fontSize = `${fontSettings.fontSize}px`;
+        // 根据字号调整行高，与coordinator.js保持一致
+        lineHeight = fontSettings.lineHeight && typeof fontSettings.lineHeight === 'number'
+          ? String(fontSettings.lineHeight)
+          : (fontSettings.fontSize <= 14 ? '1.7' : fontSettings.fontSize <= 18 ? '1.6' : '1.5');
+      }
+
+      if (typeof fontSettings.letterSpacing === 'number') {
+        letterSpacing = fontSettings.letterSpacing;
+      }
+    } catch (error) {
+      console.warn('Failed to apply font settings to clipboard container:', error);
+    }
+  }
+
+  // 这些样式旨在模拟一个干净的、标准的富文本环境，
+  // 以提高在不同粘贴目标（特别是社交平台）中的兼容性。
+  container.style.cssText = `
+    font-family: ${fontFamily};
+    font-size: ${fontSize};
+    line-height: ${lineHeight};
+    letter-spacing: ${letterSpacing}px;
+    font-weight: 400;
+    color: #333;
+    background-color: #ffffff;
+    padding: 0;
+    margin: 0;
+    word-wrap: break-word;
+    text-align: left;
+  `;
+
+  // 将其放置在屏幕外，用户不可见，并优化性能
+  container.style.position = 'absolute';
+  container.style.left = '-9999px';
+  container.style.top = '-9999px';
+  container.style.width = '1px';
+  container.style.height = '1px';
+  container.style.opacity = '0';
+  container.style.overflow = 'hidden';
+  container.style.pointerEvents = 'none';
+  container.style.zIndex = '-1';
+  container.style.visibility = 'hidden';
+
+  container.innerHTML = html;
+  return container;
+}
+
+/**
+ * 尝试使用现代 Clipboard API 进行复制。
+ * @private
+ */
+async function copyWithClipboardAPI(html, plainText) {
+  const blobHtml = new Blob([html], { type: 'text/html' });
+  const blobText = new Blob([plainText || html.replace(/<[^>]*>/g, '')], { type: 'text/plain' });
+  await navigator.clipboard.write([new ClipboardItem({ 'text/html': blobHtml, 'text/plain': blobText })]);
+}
+
+/**
+ * 尝试使用传统的 execCommand 进行复制（拦截 copy 事件，无需改变选区）。
+ * 这种方式可以最大程度避免页面滚动/抖动。
+ * @private
+ */
+function copyWithExecCommandViaListener(html, plainText) {
+  return new Promise((resolve, reject) => {
+    let succeeded = false;
+    const onCopy = (e) => {
+      try {
+        e.clipboardData.setData('text/html', html);
+        e.clipboardData.setData('text/plain', plainText || html.replace(/<[^>]*>/g, ''));
+        e.preventDefault();
+        succeeded = true;
+      } catch (_) {}
+    };
+    document.addEventListener('copy', onCopy, true);
+
+    // 某些浏览器要求有选区才能触发 copy；使用 1x1 的隐藏编辑节点，尽量避免滚动
+    const ghost = document.createElement('div');
+    ghost.setAttribute('contenteditable', 'true');
+    ghost.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 1px; height: 1px;
+      opacity: 0; overflow: hidden; pointer-events: none; z-index: -1;
+      contain: strict; transform: translateZ(0);
+    `;
+    ghost.textContent = '.';
+    document.body.appendChild(ghost);
+
+    const prevScrollX = window.scrollX; const prevScrollY = window.scrollY;
+    const range = document.createRange();
+    range.selectNodeContents(ghost);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    try {
+      const ok = document.execCommand('copy');
+      if (!ok && !succeeded) throw new Error('execCommand returned false.');
+      resolve(true);
+    } catch (err) {
+      reject(err);
+    } finally {
+      selection.removeAllRanges();
+      if (ghost.parentNode) ghost.parentNode.removeChild(ghost);
+      if (typeof window.scrollTo === 'function') window.scrollTo(prevScrollX, prevScrollY);
+      document.removeEventListener('copy', onCopy, true);
+    }
+  });
+}
+
+/**
+ * 尝试使用传统的 execCommand 进行复制（选区方式，作为最终兜底）。
+ * @private
+ */
+function copyWithExecCommand() {
+  if (!document.execCommand('copy')) {
+    throw new Error('execCommand returned false.');
+  }
+}
+
+/**
+ * 将 HTML 字符串作为富文本复制到剪贴板，并针对社交平台进行优化。
+ * @param {string} html - 要复制的 HTML 内容。
+ * @param {Object} fontSettings - 字体设置对象（可选）
+ * @returns {Promise<boolean>} - 复制成功时 resolve(true)，否则 reject(error)。
+ */
+export async function copyToSocialClean(html, fontSettings = null) {
+  if (!html) {
+    throw ErrorHandler.wrap(
+      new Error(CLIPBOARD_ERRORS.NO_CONTENT),
+      ERROR_TYPES.CLIPBOARD,
+      '剪贴板复制'
+    );
+  }
+
+  const sizeKB = (html.length / 1024).toFixed(1);
+
+  try {
+    // 使用 Promise.race 实现超时控制
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('复制操作超时')), TIMEOUTS.CLIPBOARD_OPERATION);
+    });
+
+    const copyPromise = async () => {
+      // 优先尝试纯API方式，完全避免DOM操作
+      if (navigator.clipboard && navigator.clipboard.write) {
+        try {
+          const plainText = html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+          await copyWithClipboardAPI(html, plainText);
+          return true;
+        } catch (apiError) {
+          // 如果纯API失败，继续尝试DOM方式
+        }
+      }
+
+      // 如果纯API失败，优先采用“copy事件监听”方式，不产生选区/不插入DOM，避免页面抖动
+      try {
+        const plainText = html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+        await copyWithExecCommandViaListener(html, plainText);
+        return true;
+      } catch (_) {
+        // 仍失败时，最后使用选区兜底（此路径才创建/插入容器）
+        const container = createRichTextContainer(html, fontSettings);
+        container.style.cssText = `
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          width: 1px !important;
+          height: 1px !important;
+          opacity: 0 !important;
+          overflow: hidden !important;
+          pointer-events: none !important;
+          z-index: -9999 !important;
+          visibility: hidden !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          border: none !important;
+          outline: none !important;
+          transform: translate(-9999px, -9999px) !important;
+          display: block !important;
+        `;
+        document.body.appendChild(container);
+        try {
+          const prevScrollX = window.scrollX;
+          const prevScrollY = window.scrollY;
+          const prevActive = document.activeElement;
+
+          const range = document.createRange();
+          range.selectNodeContents(container);
+          const selection = window.getSelection();
+          selection.removeAllRanges();
+          selection.addRange(range);
+
+          try {
+            copyWithExecCommand();
+          } finally {
+            selection.removeAllRanges();
+            if (typeof window.scrollTo === 'function') window.scrollTo(prevScrollX, prevScrollY);
+            try { prevActive?.focus?.(); } catch (_) {}
+          }
+          return true;
+        } finally {
+          if (document.body.contains(container)) {
+            document.body.removeChild(container);
+          }
+        }
+      }
+    };
+
+    return await Promise.race([copyPromise(), timeoutPromise]);
+
+  } catch (error) {
+    throw ErrorHandler.handleClipboardError(error, parseFloat(sizeKB));
+  }
+}
+
+// 向后兼容性导出
+export const copyToWechatClean = copyToSocialClean;

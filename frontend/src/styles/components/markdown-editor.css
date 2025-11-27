@@ -1,0 +1,196 @@
+/* MarkdownEditor 组件样式 */
+
+.markdown-editor {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background-color: var(--bg-primary);
+}
+
+/* 编辑器工具栏 */
+.editor-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-light);
+  height: 56px;
+  box-sizing: border-box;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  overflow-x: auto;
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 24px;
+  background-color: var(--border-light);
+  margin: 0 8px;
+}
+
+/* 工具栏按钮 - Neumorphism 风格 */
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 10px;
+  background: #e8e8eb;
+  color: var(--theme-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 10px 0;
+  box-shadow:
+    5px 5px 10px rgba(163, 177, 198, 0.7),
+    -5px -5px 10px rgba(255, 255, 255, 0.9);
+}
+
+.toolbar-btn:hover {
+  color: var(--theme-primary-hover);
+  box-shadow:
+    inset 3px 3px 6px rgba(163, 177, 198, 0.5),
+    inset -3px -3px 6px rgba(255, 255, 255, 0.8);
+}
+
+.toolbar-btn:active {
+  color: var(--theme-primary-dark);
+  box-shadow:
+    inset 4px 4px 8px rgba(163, 177, 198, 0.6),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.9);
+}
+
+.toolbar-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  color: #9ca3af;
+  box-shadow:
+    2px 2px 4px rgba(163, 177, 198, 0.3),
+    -2px -2px 4px rgba(255, 255, 255, 0.5);
+}
+
+.toolbar-btn svg {
+  width: 20px;
+  height: 20px;
+  transition: all 0.2s ease;
+}
+
+.toolbar-btn:hover svg {
+  transform: scale(1.05);
+}
+
+.toolbar-btn-guide {
+  background: var(--theme-primary);
+  color: white;
+  box-shadow:
+    inset 2px 2px 4px rgba(0, 0, 0, 0.2),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.1),
+    0 0 15px rgba(var(--theme-primary-rgb), 0.3);
+}
+
+.toolbar-btn-guide:hover {
+  background: var(--theme-primary-hover);
+  box-shadow:
+    inset 1px 1px 2px rgba(0, 0, 0, 0.15),
+    inset -1px -1px 2px rgba(255, 255, 255, 0.05),
+    0 0 20px rgba(var(--theme-primary-rgb), 0.4);
+}
+
+/* 字数统计 */
+.word-count {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-family: var(--theme-code-font-family);
+}
+
+/* 编辑器容器 */
+.editor-container {
+  flex: 1;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+}
+
+.codemirror-wrapper {
+  height: 100%;
+}
+
+/* CodeMirror 样式 - 简化版 */
+.markdown-editor :deep(.cm-editor) {
+  height: 100%;
+  font-size: 18px; /* 增大字体大小，提高可读性 */
+}
+
+.markdown-editor :deep(.cm-scroller) {
+  font-family: var(--theme-code-font-family);
+  line-height: 1.7;
+}
+
+.markdown-editor :deep(.cm-content) {
+  padding: 24px;
+  min-height: 100%;
+}
+
+.markdown-editor :deep(.cm-focused) {
+  outline: none;
+}
+
+.markdown-editor :deep(.cm-cursor) {
+  border-left-color: var(--theme-primary);
+  border-left-width: 2px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .markdown-editor :deep(.cm-content) {
+    padding: 16px;
+  }
+}
+
+
+/* 标题颜色 */
+.markdown-editor :deep(.cm-header-1) { color: var(--theme-primary); }
+.markdown-editor :deep(.cm-header-2) { color: var(--theme-primary-dark); }
+.markdown-editor :deep(.cm-header-3) { color: var(--theme-text-primary); }
+.markdown-editor :deep(.cm-header-4) { color: var(--theme-text-secondary); }
+.markdown-editor :deep(.cm-header-5) { color: var(--theme-text-secondary); }
+.markdown-editor :deep(.cm-header-6) { color: var(--theme-text-tertiary); }
+
+/* 其他语法高亮 */
+.markdown-editor :deep(.cm-strong) { font-weight: bold; }
+.markdown-editor :deep(.cm-em) { font-style: italic; }
+.markdown-editor :deep(.cm-strikethrough) { text-decoration: line-through; }
+.markdown-editor :deep(.cm-link) { color: var(--theme-primary); text-decoration: underline; }
+.markdown-editor :deep(.cm-quote) { color: var(--theme-text-secondary); font-style: italic; }
+.markdown-editor :deep(.cm-comment) { color: var(--theme-text-tertiary); }
+.markdown-editor :deep(.cm-keyword) { color: var(--theme-primary); }
+.markdown-editor :deep(.cm-string) { color: var(--theme-primary-dark); }
+.markdown-editor :deep(.cm-number) { color: var(--theme-primary); }
+.markdown-editor :deep(.cm-atom) { color: var(--theme-primary); }
+.markdown-editor :deep(.cm-property) { color: var(--theme-primary-hover); }
+.markdown-editor :deep(.cm-def) { color: var(--theme-primary-dark); }
+.markdown-editor :deep(.cm-variable) { color: var(--theme-primary-hover); }
+.markdown-editor :deep(.cm-operator) { color: var(--theme-primary); }
+.markdown-editor :deep(.cm-meta) { color: var(--theme-primary-dark); }
+.markdown-editor :deep(.cm-tag) { color: var(--theme-primary); }
+.markdown-editor :deep(.cm-attribute) { color: var(--theme-primary-dark); }

@@ -118,11 +118,18 @@ jobs:
           echo "RELEASE_NAME=$RELEASE_NAME" >> $GITHUB_ENV
           echo "PRERELEASE=$PRERELEASE" >> $GITHUB_ENV
 
-      - name: Package macOS app
+      - name: Rename build artifacts
         run: |
+          # Rename Windows artifact
+          mv artifacts/build-windows-latest/Weditor.exe artifacts/build-windows-latest/Weditor-windows.exe
+          
+          # Rename macOS artifact
           cd artifacts/build-macos-latest
-          zip -r Weditor.app.zip Weditor.app
+          zip -r Weditor-macos.app.zip Weditor.app
           cd ../..
+          
+          # Rename Linux artifact
+          mv artifacts/build-ubuntu-latest/Weditor artifacts/build-ubuntu-latest/Weditor-linux
 
       - name: Create Release and Upload Assets
         uses: softprops/action-gh-release@v2
@@ -134,8 +141,8 @@ jobs:
           draft: false
           prerelease: ${{ env.PRERELEASE }}
           files: |
-            artifacts/build-windows-latest/Weditor.exe
-            artifacts/build-macos-latest/Weditor.app.zip
-            artifacts/build-ubuntu-latest/Weditor
+            artifacts/build-windows-latest/Weditor-windows.exe
+            artifacts/build-macos-latest/Weditor-macos.app.zip
+            artifacts/build-ubuntu-latest/Weditor-linux
           generate_release_notes: false
           fail_on_unmatched_files: false

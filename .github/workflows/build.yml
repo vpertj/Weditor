@@ -103,6 +103,9 @@ jobs:
         with:
           path: artifacts
 
+      - name: Debug - List artifacts directory
+        run: ls -la artifacts/ artifacts/*
+
       - name: Set release information
         id: release_info
         run: |

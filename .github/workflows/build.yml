@@ -132,3 +132,5 @@ jobs:
             artifacts/build-windows-latest/Weditor.exe
             artifacts/build-macos-latest/Weditor.app
             artifacts/build-ubuntu-latest/Weditor.AppImage
+          generate_release_notes: false
+          fail_on_unmatched_files: false

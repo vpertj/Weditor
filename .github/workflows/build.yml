@@ -78,17 +78,13 @@ jobs:
         working-directory: frontend
 
       - name: Build Wails application
-        run: wails build
+        run: wails build -tags webkit2_41
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-${{ matrix.os }}
-          path: |
-            build/bin/*
-            build/windows/*.exe
-            build/darwin/*.app
-            build/linux/*.AppImage
+          path: build/bin/*
 
   release:
     needs: build
@@ -131,9 +127,6 @@ jobs:
           name: ${{ env.RELEASE_NAME }}
           draft: false
           prerelease: ${{ env.PRERELEASE }}
-          files: |
-            artifacts/build-windows-latest/Weditor.exe
-            artifacts/build-macos-latest/Weditor.app
-            artifacts/build-ubuntu-latest/Weditor.AppImage
+          files: artifacts/**/*
           generate_release_notes: false
           fail_on_unmatched_files: false

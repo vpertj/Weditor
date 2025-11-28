@@ -129,6 +129,6 @@ jobs:
           draft: false
           prerelease: ${{ env.PRERELEASE }}
           files: |
-            artifacts/build-windows-latest/build/windows/Weditor.exe
-            artifacts/build-macos-latest/build/darwin/Weditor.app
-            artifacts/build-ubuntu-latest/build/linux/Weditor.AppImage
+            artifacts/build-windows-latest/Weditor.exe
+            artifacts/build-macos-latest/Weditor.app
+            artifacts/build-ubuntu-latest/Weditor.AppImage

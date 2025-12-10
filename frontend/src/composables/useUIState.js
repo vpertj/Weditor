@@ -18,6 +18,7 @@ export function useUIState() {
   // 状态
   const showSettingsPanel = ref(false)
   const showMarkdownGuide = ref(false)
+  const showAboutDialog = ref(false) // 关于对话框显示状态
   const syncScrollEnabled = ref(true) // 默认启用同步滚动
   const viewMode = ref('both') // 'both', 'editor', 'preview', 'wysiwyg'
 
@@ -45,6 +46,19 @@ export function useUIState() {
 
   const toggleGuide = () => {
     showMarkdownGuide.value = !showMarkdownGuide.value
+  }
+
+  // 关于对话框控制方法
+  const showAbout = () => {
+    showAboutDialog.value = true
+  }
+
+  const closeAbout = () => {
+    showAboutDialog.value = false
+  }
+
+  const toggleAbout = () => {
+    showAboutDialog.value = !showAboutDialog.value
   }
 
   // 同步滚动控制方法
@@ -88,6 +102,7 @@ export function useUIState() {
     // 状态
     showSettingsPanel,
     showMarkdownGuide,
+    showAboutDialog,
     syncScrollEnabled,
     viewMode,
 
@@ -100,6 +115,11 @@ export function useUIState() {
     showGuide,
     closeGuide,
     toggleGuide,
+
+    // 关于对话框方法
+    showAbout,
+    closeAbout,
+    toggleAbout,
 
     // 同步滚动方法
     toggleSyncScroll,

@@ -14,6 +14,7 @@
         @toggle-settings="toggleSettingsPanel"
         @set-view-mode="setViewMode"
         @show-guide="showGuide"
+        @show-about="showAbout"
         @copy-format-select="handleCopyFormatSelect"
         @update:selected-copy-format="selectedCopyFormat.value = $event"
       />
@@ -75,6 +76,12 @@
       @close="closeGuide"
     />
 
+    <!-- 关于弹窗 -->
+    <AboutDialog
+      :show="showAboutDialog"
+      @close="closeAbout"
+    />
+
   </div>
 </template>
 
@@ -88,6 +95,7 @@ import AppMain from './components/layout/AppMain.vue'
 import AppFooter from './components/layout/AppFooter.vue'
 import SettingsPanel from './components/SettingsPanel.vue'
 import MarkdownGuide from './components/MarkdownGuide.vue'
+import AboutDialog from './components/AboutDialog.vue'
 import BackToTopFloat from './components/BackToTopFloat.vue'
 
 // 使用应用状态管理
@@ -96,6 +104,7 @@ const {
   markdownContent,
   showSettingsPanel,
   showMarkdownGuide,
+  showAboutDialog,
   syncScrollEnabled,
   viewMode,
   notifications,
@@ -118,6 +127,8 @@ const {
   closeSettingsPanel,
   showGuide,
   closeGuide,
+  showAbout,
+  closeAbout,
   toggleSyncScroll,
   setViewMode,
   showNotification,

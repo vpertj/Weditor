@@ -184,5 +184,31 @@
   "copyFormat": {
     "social": "WeChat Official Account format",
     "markdown": "Markdown"
+  },
+  "about": {
+    "title": "About WEditor",
+    "subtitle": "Modern Markdown Editor",
+    "softwareInfo": "Software Info",
+    "version": "Version",
+    "author": "Author",
+    "buildDate": "Build Date",
+    "license": "License",
+    "features": "Features",
+    "feature1": {
+      "title": "Modern Editing Experience",
+      "description": "Provides a smooth Markdown editing experience with real-time preview and WYSIWYG mode"
+    },
+    "feature2": {
+      "title": "Multi-platform Support",
+      "description": "Supports Windows, macOS, and Linux operating systems"
+    },
+    "feature3": {
+      "title": "Rich Customization Options",
+      "description": "Offers theme switching, font adjustment, and other customization options to meet personal needs"
+    },
+    "feature4": {
+      "title": "Easy Export Function",
+      "description": "Supports export to multiple formats for easy sharing and publishing"
+    }
   }
 }

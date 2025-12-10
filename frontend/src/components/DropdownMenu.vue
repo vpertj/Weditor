@@ -189,6 +189,22 @@ onUnmounted(() => {
   margin-top: 0;
 }
 
+/* 确保垂直工具栏中的下拉触发器与其他按钮大小一致 */
+.app-header.vertical .dropdown-trigger.header-btn {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  gap: 0;
+  background: var(--gray-100);
+  border: none;
+  box-shadow: var(--shadow-neumorphism-small);
+  color: var(--theme-primary);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .dropdown-item {
   cursor: pointer;
   transition: background-color 0.15s ease;
@@ -307,24 +323,16 @@ onUnmounted(() => {
 
 /* 支持 header-btn 类的简洁 Neumorphism 样式 - 跟随主题色 */
 .dropdown-trigger.header-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-md) var(--spacing-lg);
-  border: none;
-  border-radius: var(--radius-2xl);
-  background: var(--gray-100);
-  color: var(--theme-primary);
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  line-height: var(--line-height-tight);
-  text-decoration: none;
-  cursor: pointer;
-  transition: var(--transition-all-normal);
-  white-space: nowrap;
-  user-select: none;
-  position: relative;
-  box-shadow: var(--shadow-neumorphism-small);
+  /* 继承 header-btn 的样式 */
+  margin: 0;
+  padding: 0;
+  gap: 0;
+  width: auto;
+  height: auto;
+  flex-direction: row;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
 }
 
 .dropdown-trigger.header-btn:hover:not(:disabled) {

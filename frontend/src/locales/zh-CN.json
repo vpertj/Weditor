@@ -183,8 +183,31 @@
   "copyFormat": {
     "social": "公众号格式",
     "markdown": "MD 格式"
+  },
+  "about": {
+    "title": "关于 WEditor",
+    "subtitle": "现代化的 Markdown 编辑器",
+    "softwareInfo": "软件信息",
+    "version": "版本",
+    "author": "作者",
+    "buildDate": "构建日期",
+    "license": "许可证",
+    "features": "功能介绍",
+    "feature1": {
+      "title": "现代化编辑体验",
+      "description": "提供流畅的 Markdown 编辑体验，支持实时预览和所见即所得模式"
+    },
+    "feature2": {
+      "title": "多平台支持",
+      "description": "支持 Windows、macOS 和 Linux 三大主流操作系统"
+    },
+    "feature3": {
+      "title": "丰富的自定义选项",
+      "description": "提供主题切换、字体调整等多种自定义选项，满足个性化需求"
+    },
+    "feature4": {
+      "title": "易用的导出功能",
+      "description": "支持导出为多种格式，方便分享和发布"
+    }
   }
-
-
-
 }

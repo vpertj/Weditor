@@ -64,7 +64,7 @@ jobs:
       - name: Update version in package.json
         run: |
           cd frontend
-          npm version ${{ env.VERSION }} --no-git-tag-version
+          npm version ${{ env.VERSION }} --no-git-tag-version --allow-same-version
         shell: bash
 
       - name: Install frontend dependencies

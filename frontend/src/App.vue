@@ -52,6 +52,26 @@
     <!-- 全局回到顶部悬浮按钮 -->
     <BackToTopFloat />
 
+    <!-- 草稿恢复横幅 -->
+    <div v-if="showDraftBanner" class="draft-banner">
+      <div class="draft-banner-content">
+        <span class="draft-banner-icon">💾</span>
+        <span class="draft-banner-text">
+          检测到未保存的草稿
+          <small v-if="draftTime">({{ draftTime }})</small>
+        </span>
+        <div class="draft-banner-actions">
+          <button class="draft-btn recover" @click="handleRecoverDraft">恢复草稿</button>
+          <button class="draft-btn discard" @click="handleDiscardDraft">丢弃</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 自动保存状态 -->
+    <div v-if="lastSavedAt && !isSaving" class="autosave-indicator">
+      <span>{{ isMac ? '自动保存' : '自动保存' }} {{ lastSavedAt }}</span>
+    </div>
+
     <!-- 通知组件 -->
     <div v-if="notifications.length > 0" class="notification-container">
       <div
@@ -87,7 +107,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useAppState, useElectron } from './composables/index.js'
+import { useAppState, useWails, usePlatform, useAutoSave } from './composables/index.js'
 import { useGlobalThemeManager } from './composables/index.js'
 import { nextTick } from 'vue'
 import AppHeader from './components/layout/AppHeader.vue'
@@ -98,10 +118,18 @@ import MarkdownGuide from './components/MarkdownGuide.vue'
 import AboutDialog from './components/AboutDialog.vue'
 import BackToTopFloat from './components/BackToTopFloat.vue'
 
-// 使用应用状态管理
+// ==========================================
+// 平台检测
+// ==========================================
+const { isMac, isWindows, isLinux, platform } = usePlatform()
+
+// ==========================================
+// 应用状态管理
+// ==========================================
 const {
   // 状态
   markdownContent,
+  htmlContent,
   showSettingsPanel,
   showMarkdownGuide,
   showAboutDialog,
@@ -136,102 +164,189 @@ const {
   openGithub
 } = useAppState()
 
-// 使用Electron集成
+// ==========================================
+// 桌面集成 (Wails)
+// ==========================================
 const {
   openFile,
   saveFile,
+  saveFileAs,
+  newFile,
+  exportHTML,
   setupMenuListeners,
-  setupFileUpdateListener,
-  currentFilePath
-} = useElectron()
+  setupFileDropListener,
+  currentFilePath,
+  currentFileName
+} = useWails()
 
-// 设置菜单监听器
+// ==========================================
+// 自动保存
+// ==========================================
+const {
+  lastSavedAt,
+  isSaving,
+  isDraftAvailable,
+  draftTime,
+  recoverDraft,
+  clearDraft
+} = useAutoSave(markdownContent, {
+  delay: 2000,
+  enabled: true,
+  saveToDisk: async (content) => {
+    // 如果当前有已打开的文件路径，自动保存到磁盘
+    if (currentFilePath.value) {
+      if (window.go && window.go.main && window.go.main.App) {
+        await window.go.main.App.SaveFile(currentFilePath.value, content)
+      }
+    }
+  },
+  filePath: currentFilePath
+})
+
+// ==========================================
+// 草稿恢复
+// ==========================================
+const showDraftBanner = ref(false)
+
 nextTick(() => {
-  console.log('⏰ 在下一个tick中设置菜单监听器...');
+  // 检测是否有草稿
+  if (isDraftAvailable.value && !hasContent.value) {
+    showDraftBanner.value = true
+  }
+})
+
+function handleRecoverDraft() {
+  const draft = recoverDraft()
+  if (draft) {
+    updateMarkdownContent(draft)
+    showDraftBanner.value = false
+    showNotification('已恢复上次编辑的草稿', 'success')
+  }
+}
+
+function handleDiscardDraft() {
+  clearDraft()
+  showDraftBanner.value = false
+}
+
+// ==========================================
+// 菜单监听器
+// ==========================================
+nextTick(() => {
+  console.log(`🖥️ 运行平台: ${platform.value}, Wails 菜单监听器初始化`)
+
   setupMenuListeners({
-    onOpenFile: (event, { filePath, content }) => {
-      console.log('📁 渲染进程收到打开文件事件');
-      console.log('📂 文件路径:', filePath);
-      
-      // 更新编辑器内容
-      updateMarkdownContent(content);
-      console.log('✅ 编辑器内容已更新');
-      
-      // 设置当前文件路径（通过 openFile 函数）
-      openFile(filePath, content);
-      console.log('📁 当前文件路径已设置');
-      
-      const fileName = filePath.split('/').pop() || filePath.split('\\').pop();
-      console.log('🔔 显示成功通知:', fileName);
-      showNotification(`已打开文件: ${fileName}`, 'success');
-      
-      console.log('🎉 文件打开流程完成');
+    // 新建文件
+    onNewFile: () => {
+      console.log('📄 菜单: 新建文件')
+      if (newFile()) {
+        clearContent()
+        showNotification('已创建新文件', 'success')
+      }
     },
+
+    // 打开文件
+    onOpenFile: async () => {
+      console.log('📁 菜单: 打开文件')
+      const result = await openFile()
+      if (!result) {
+        console.log('用户取消了操作')
+        return
+      }
+      if (result.success) {
+        updateMarkdownContent(result.content)
+        clearDraft()
+        showNotification(`已打开: ${currentFileName.value}`, 'success')
+      } else {
+        showNotification(`打开失败: ${result.message}`, 'error')
+      }
+    },
+
+    // 保存文件
     onSaveFile: async () => {
-      console.log('💾 渲染进程收到保存文件事件');
-      try {
-        const result = await saveFile(markdownContent.value);
-        if (result.success) {
-          console.log('✅ 文件保存成功:', result.filePath);
-          const fileName = result.filePath.split('/').pop() || result.filePath.split('\\').pop();
-          showNotification(`文件已保存: ${fileName}`, 'success');
-        } else {
-          console.log('❌ 文件保存失败:', result.message);
-          showNotification(`保存失败: ${result.message}`, 'error');
-        }
-      } catch (error) {
-        console.error('💥 保存文件时发生错误:', error);
-        showNotification(`保存失败: ${error.message}`, 'error');
+      console.log('💾 菜单: 保存文件')
+      const result = await saveFile(markdownContent.value)
+      if (result.success) {
+        clearDraft()
+        showNotification(`已保存: ${currentFileName.value}`, 'success')
+      } else {
+        showNotification(`保存失败: ${result.message}`, 'error')
+      }
+    },
+
+    // 另存为
+    onSaveAsFile: async () => {
+      console.log('💾 菜单: 另存为')
+      const result = await saveFileAs(markdownContent.value)
+      if (result.success) {
+        clearDraft()
+        showNotification(`已保存: ${currentFileName.value}`, 'success')
+      } else if (result.message !== '用户取消了操作') {
+        showNotification(`保存失败: ${result.message}`, 'error')
+      }
+    },
+
+    // 导入文件（通过文件选择器）
+    onImportFile: () => {
+      triggerImportMd()
+    },
+
+    // 视图切换
+    onViewBoth: () => setViewMode('both'),
+    onViewEditor: () => setViewMode('editor'),
+    onViewPreview: () => setViewMode('preview'),
+    onToggleSyncScroll: () => toggleSyncScroll(),
+
+    // 面板
+    onToggleSettings: () => toggleSettingsPanel(),
+    onShowGuide: () => showGuide(),
+    onShowAbout: () => showAbout(),
+
+    // 导出 HTML
+    onExportHTML: async () => {
+      console.log('🌐 菜单: 导出 HTML')
+      if (!htmlContent.value) {
+        showNotification('预览尚未生成，请等待渲染完成', 'warning')
+        return
+      }
+      const result = await exportHTML(htmlContent.value, '')
+      if (result && result.success) {
+        showNotification(`已导出: ${result.filePath.split('/').pop()}`, 'success')
+      } else if (result && result.message !== '用户取消了操作') {
+        showNotification(`导出失败: ${result.message}`, 'error')
       }
     }
   })
-  
-  // 设置文件内容更新监听器
-  setupFileUpdateListener((event, { filePath, content }) => {
-    console.log('📨 收到文件内容更新事件');
-    console.log('📂 文件路径:', filePath);
-    console.log('📄 新内容长度:', content.length);
-    
-    // 检查是否是当前打开的文件
-    if (currentFilePath.value === filePath) {
-      console.log('🔄 更新当前文件内容...');
-      
-      // 检查内容是否真的发生了变化
-      if (markdownContent.value !== content) {
-        // 更新编辑器内容
-        updateMarkdownContent(content);
-        console.log('✅ 编辑器内容已自动更新');
-        
-        // 显示更新通知
-        const fileName = filePath.split('/').pop() || filePath.split('\\').pop();
-        showNotification(`文件已更新: ${fileName}`);
-        
-        // 可选：记录更新日志
-        console.log('📝 文件内容更新记录:', {
-          filePath,
-          oldLength: markdownContent.value.length,
-          newLength: content.length,
-          timestamp: new Date().toISOString()
-        });
-      } else {
-        console.log('ℹ️ 内容相同，无需更新');
+
+  // 文件拖放支持
+  setupFileDropListener(async (filePath) => {
+    try {
+      const result = await window.go.main.App.ReadFile(filePath)
+      if (result) {
+        updateMarkdownContent(result)
+        clearDraft()
+        const name = filePath.split('/').pop() || filePath
+        showNotification(`已拖放打开: ${name}`, 'success')
       }
-    } else {
-      console.log('ℹ️ 不是当前打开的文件，忽略更新:', filePath);
+    } catch (e) {
+      showNotification(`无法读取文件: ${e.message}`, 'error')
     }
-  });
+  })
 })
 
-// 初始化主题管理器（全局单例内部已自动调用 initialize）
+// ==========================================
+// 主题管理器
+// ==========================================
 useGlobalThemeManager()
 
-// 导入：隐藏文件输入
-const fileInputRef = ref<HTMLInputElement | null>(null)
+// ==========================================
+// 导入 .md 文件（通过浏览器文件选择器）
+// ==========================================
+const fileInputRef = ref(null)
 const triggerImportMd = () => fileInputRef.value && fileInputRef.value.click()
 
 const handleFileChosen = async (e) => {
   const file = e.target.files && e.target.files[0]
-  // 允许重复选择同一个文件
   e.target.value = ''
   if (!file) return
   if (!/\.(md|markdown)$/i.test(file.name) && !/text\/markdown|text\/plain/.test(file.type)) {
@@ -241,20 +356,12 @@ const handleFileChosen = async (e) => {
   try {
     const text = await file.text()
     updateMarkdownContent(text)
+    clearDraft()
     showNotification(`已导入：${file.name}`, 'success')
   } catch (err) {
     showNotification(`导入失败：${err.message}`, 'error')
   }
 }
-
-// 基于第一行 H1 自动生成文件名（导出功能移除后不再使用，可保留以备后续扩展）
-// const makeExportFilename = () => {
-//   const md = markdownContent.value || ''
-//   const h1Match = md.match(/^#\s+(.+?)\s*$/m)
-//   const raw = (h1Match && h1Match[1]) || 'markdown-preview'
-//   return raw.replace(/[\\/:*?"<>|]/g, '').replace(/\s+/g, ' ').trim().slice(0, 80) || 'markdown-preview'
-// }
-
 </script>
 
 <style scoped>
@@ -300,5 +407,97 @@ const handleFileChosen = async (e) => {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+/* 草稿恢复横幅 */
+.draft-banner {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1001;
+  background: var(--theme-primary, #4A90D9);
+  color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  animation: draft-slide-in 0.3s ease-out;
+  max-width: 500px;
+}
+
+.draft-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+}
+
+.draft-banner-icon {
+  font-size: 18px;
+}
+
+.draft-banner-text {
+  flex: 1;
+  font-size: 14px;
+}
+
+.draft-banner-text small {
+  opacity: 0.8;
+  font-size: 12px;
+}
+
+.draft-banner-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.draft-btn {
+  padding: 6px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.draft-btn.recover {
+  background: white;
+  color: var(--theme-primary, #4A90D9);
+}
+
+.draft-btn.recover:hover {
+  background: #f0f0f0;
+}
+
+.draft-btn.discard {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.draft-btn.discard:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+@keyframes draft-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* 自动保存状态指示器 */
+.autosave-indicator {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  z-index: 1001;
+  font-size: 11px;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  pointer-events: none;
 }
 </style>

@@ -191,9 +191,9 @@ const handleEditorScroll = (scrollPercentage) => {
     if (typeof window !== 'undefined' && !window.__scrollSyncLock) {
       window.__scrollSyncLock = true
       previewElement.scrollTop = targetScrollTop
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         window.__scrollSyncLock = false
-      }, 0)
+      })
     }
   }
 }

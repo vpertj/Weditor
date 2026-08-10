@@ -76,7 +76,7 @@ export default {
         const targetScrollTop = Math.round(previewMaxScrollTop * scrollPercentage)
         if (typeof window !== 'undefined') window.__scrollSyncLock = true
         previewElement.scrollTop = targetScrollTop
-        if (typeof window !== 'undefined') setTimeout(() => { window.__scrollSyncLock = false }, 0)
+        if (typeof window !== 'undefined') requestAnimationFrame(() => { window.__scrollSyncLock = false })
       } else {
         console.warn('Preview element not found for scroll synchronization')
       }

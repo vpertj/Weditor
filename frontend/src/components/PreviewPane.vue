@@ -53,6 +53,49 @@ import { useGlobalThemeManager } from '../composables/index.js'
 import { escapeHtml as sharedEscapeHtml } from '../shared/utils/text.js'
 import mermaid from 'mermaid'
 
+// 通用防抖工具函数
+function debounce(fn, delay = 300) {
+  let timer = null
+  let lastArgs = null
+  const debounced = (...args) => {
+    lastArgs = args
+    if (timer) clearTimeout(timer)
+    timer = setTimeout(() => {
+      timer = null
+      fn(...lastArgs)
+    }, delay)
+  }
+  debounced.cancel = () => {
+    if (timer) clearTimeout(timer)
+    timer = null
+  }
+  return debounced
+}
+
+// 通用节流工具函数 (leading + trailing)
+function throttle(fn, interval = 200) {
+  let lastTime = 0
+  let timer = null
+  const throttled = (...args) => {
+    const now = Date.now()
+    if (now - lastTime >= interval) {
+      lastTime = now
+      fn(...args)
+    } else if (!timer) {
+      timer = setTimeout(() => {
+        lastTime = Date.now()
+        timer = null
+        fn(...args)
+      }, interval - (now - lastTime))
+    }
+  }
+  throttled.cancel = () => {
+    if (timer) clearTimeout(timer)
+    timer = null
+  }
+  return throttled
+}
+
 export default {
   name: 'PreviewPane',
   props: {
@@ -151,9 +194,14 @@ export default {
         
         if (typeof window !== 'undefined') window.__scrollSyncLock = true
         previewContent.value.scrollTop = targetScrollTop
-        if (typeof window !== 'undefined') setTimeout(() => { window.__scrollSyncLock = false }, 0)
+        if (typeof window !== 'undefined') requestAnimationFrame(() => { window.__scrollSyncLock = false })
       }
     }
+
+    // 节流后的保存滚动位置（每 200ms 最多保存一次）
+    const saveScrollPositionThrottled = throttle(() => {
+      saveScrollPosition()
+    }, 200)
 
     // 滚动同步处理
     const handleScroll = (e) => {
@@ -162,8 +210,8 @@ export default {
       const scrollHeight = element.scrollHeight
       const clientHeight = element.clientHeight
 
-      // 保存滚动位置
-      saveScrollPosition()
+      // 节流保存滚动位置（避免每帧都写 localStorage）
+      saveScrollPositionThrottled()
 
       // 只有在启用同步滚动时才执行同步；程序触发的滚动需要跳过
       if (!props.syncScrollEnabled || (typeof window !== 'undefined' && window.__scrollSyncLock)) return
@@ -172,14 +220,16 @@ export default {
       const maxScrollTop = Math.max(0, scrollHeight - clientHeight)
       const scrollPercentage = maxScrollTop > 0 ? scrollTop / maxScrollTop : 0
 
-      // 同步到编辑器
+      // 同步到编辑器（用 requestAnimationFrame 替代 setTimeout(0)，对齐渲染帧）
       const editorElement = document.querySelector('.cm-scroller')
       if (editorElement) {
         const editorMaxScrollTop = Math.max(0, editorElement.scrollHeight - editorElement.clientHeight)
         const targetScrollTop = Math.round(editorMaxScrollTop * scrollPercentage)
         if (typeof window !== 'undefined') window.__scrollSyncLock = true
         editorElement.scrollTop = targetScrollTop
-        if (typeof window !== 'undefined') setTimeout(() => { window.__scrollSyncLock = false }, 0)
+        if (typeof window !== 'undefined') {
+          requestAnimationFrame(() => { window.__scrollSyncLock = false })
+        }
       }
     }
 
@@ -203,20 +253,35 @@ export default {
       }
     })
 
+    // 缓存当前主题对象（避免每次 processMarkdown 都读 localStorage + JSON.parse）
+    let cachedTheme = null
+    let cachedThemeExpiry = 0
+
     // 获取当前有效的颜色主题（包括临时自定义主题）
     const getCurrentTheme = () => {
-      // 检查是否有临时自定义主题
+      const now = Date.now()
+      if (now < cachedThemeExpiry && cachedTheme !== null) {
+        return cachedTheme
+      }
       try {
         const tempTheme = localStorage.getItem('temp-custom-theme')
         if (tempTheme) {
-          return JSON.parse(tempTheme)
+          cachedTheme = JSON.parse(tempTheme)
+        } else {
+          cachedTheme = currentColorTheme.value
         }
       } catch (error) {
         console.warn('Failed to load temp custom theme:', error)
+        cachedTheme = currentColorTheme.value
       }
+      cachedThemeExpiry = now + 5000 // 5秒内复用缓存
+      return cachedTheme
+    }
 
-      // 返回当前主题
-      return currentColorTheme.value
+    // 使主题缓存失效（主题变更时调用）
+    const invalidateThemeCache = () => {
+      cachedThemeExpiry = 0
+      cachedTheme = null
     }
 
     // 处理Markdown解析和转换
@@ -357,34 +422,32 @@ export default {
       }
     }
 
-    // 监听markdown内容变化 - 不使用immediate，等待初始化完成
+    // 创建防抖版本（300ms延迟，避免每次按键都重渲染）
+    const processMarkdownDebounced = debounce(() => {
+      processMarkdown()
+    }, 300)
+
+    // 监听markdown内容变化 - 300ms防抖，避免逐键触发完整渲染
     watch(() => props.markdown, () => {
-      processMarkdown()
+      invalidateThemeCache()
+      processMarkdownDebounced()
     })
 
-    // 监听颜色主题变化
-    watch(currentColorTheme, () => {
-      processMarkdown()
-    }, { deep: true })
-
-    // 监听代码样式变化
-    watch(currentCodeStyle, () => {
-      processMarkdown()
-    }, { deep: true })
-
-    // 监听布局主题系统变化
-    watch(currentLayoutId, () => {
-      processMarkdown()
-    })
-
-    // 监听字体设置变化
-    watch(currentFontSettings, () => {
-      processMarkdown()
-    }, { deep: true })
+    // 合并所有主题相关 watcher 为一个，300ms 防抖，避免启动时多次级联渲染
+    // 监听：颜色主题、代码样式、布局主题系统、字体设置
+    watch(
+      [currentColorTheme, currentCodeStyle, currentLayoutId, currentFontSettings],
+      () => {
+        invalidateThemeCache()
+        processMarkdownDebounced()
+      },
+      { deep: true }
+    )
 
     // 监听临时自定义主题变化
     const handleCustomThemeChange = () => {
-      processMarkdown()
+      invalidateThemeCache()
+      processMarkdownDebounced()
     }
 
     // 组件生命周期

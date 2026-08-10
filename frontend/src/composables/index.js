@@ -18,8 +18,17 @@ export { useUIState } from './useUIState.js';
 export { useNotification } from './useNotification.js';
 export { useClipboard } from './useClipboard.js';
 
-// Electron集成相关组合式API
+// Electron集成相关组合式API（保留兼容）
 export { useElectron } from './useElectron.js';
+
+// Wails 桌面集成（macOS/Windows 原生层）
+export { useWails } from './useWails.js';
+
+// 平台检测与快捷键适配
+export { usePlatform } from './usePlatform.js';
+
+// 自动保存（草稿恢复 + 定时存档）
+export { useAutoSave } from './useAutoSave.js';
 
 // 为向后兼容性保留的别名导出
 export { useEditor as useMarkdownEditor } from './editor/index.js';

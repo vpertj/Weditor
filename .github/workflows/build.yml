@@ -189,7 +189,7 @@ jobs:
       - name: Rename build artifacts
         run: |
           # Windows
-          mv artifacts/build-windows-latest/Weditor.exe artifacts/build-windows-latest/Weditor-windows.exe 2>/dev/null || true
+          mv artifacts/build-windows-latest/WEditor.exe artifacts/build-windows-latest/WEditor-windows.exe 2>/dev/null || true
 
           # macOS: 保留 DMG 并 zip app
           cd artifacts/build-macos-latest
@@ -198,11 +198,11 @@ jobs:
             echo "Found DMG: $DMG_FILE"
             mv "$DMG_FILE" "../$DMG_FILE"
           fi
-          zip -r Weditor-macos.app.zip Weditor.app 2>/dev/null || true
+          zip -r WEditor-macos.app.zip WEditor.app 2>/dev/null || true
           cd ../..
 
           # Linux
-          mv artifacts/build-ubuntu-latest/Weditor artifacts/build-ubuntu-latest/Weditor-linux 2>/dev/null || true
+          mv artifacts/build-ubuntu-latest/WEditor artifacts/build-ubuntu-latest/WEditor-linux 2>/dev/null || true
 
           # 汇总所有要上传的文件到 artifacts/ 目录
           echo "=== Final artifacts ==="
@@ -218,9 +218,9 @@ jobs:
           draft: false
           prerelease: ${{ env.PRERELEASE }}
           files: |
-            artifacts/build-windows-latest/Weditor-windows.exe
-            artifacts/build-macos-latest/Weditor-macos.app.zip
+            artifacts/build-windows-latest/WEditor-windows.exe
+            artifacts/build-macos-latest/WEditor-macos.app.zip
             artifacts/WEditor-*.dmg
-            artifacts/build-ubuntu-latest/Weditor-linux
+            artifacts/build-ubuntu-latest/WEditor-linux
           generate_release_notes: false
           fail_on_unmatched_files: false

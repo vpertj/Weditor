@@ -30,13 +30,11 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.22'
-          # 移除cache参数以禁用缓存
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          # 移除cache参数以禁用缓存
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install Linux dependencies
@@ -77,8 +75,78 @@ jobs:
         run: npm run build
         working-directory: frontend
 
-      - name: Build Wails application
+      - name: Build Wails application (macOS Universal)
+        if: matrix.os == 'macos-latest'
+        run: wails build -platform darwin/universal
+
+      - name: Build Wails application (Windows/Linux)
+        if: matrix.os != 'macos-latest'
         run: wails build -tags webkit2_41
+
+      - name: Create macOS DMG
+        if: matrix.os == 'macos-latest'
+        run: |
+          set -e
+          APP_PATH="build/bin/WEditor.app"
+          DMG_NAME="WEditor-${{ env.VERSION }}"
+          STAGING="/tmp/weditor-dmg-staging"
+          RW_DMG="/tmp/weditor-rw.dmg"
+          OUTPUT_DMG="build/bin/${DMG_NAME}.dmg"
+
+          echo "=== Creating DMG from: $APP_PATH ==="
+
+          # 创建临时目录，放入 app 和 Applications 快捷方式
+          rm -rf "$STAGING"
+          mkdir -p "$STAGING"
+          cp -R "$APP_PATH" "$STAGING/"
+          ln -s /Applications "$STAGING/Applications"
+
+          # 创建可读写 DMG
+          hdiutil create -size 200m -fs HFS+ -volname "${DMG_NAME}" -srcfolder "$STAGING" -format UDRW "$RW_DMG" -quiet
+
+          # 挂载 DMG
+          DEVICE=$(hdiutil attach -readwrite -noverify -noautoopen "$RW_DMG" 2>&1 | grep Apple_HFS | awk '{print $1}')
+          echo "Mounted at device: $DEVICE"
+          sleep 2
+
+          # 设置 Finder 窗口布局
+          VOLUME_PATH="/Volumes/${DMG_NAME}"
+          osascript <<EOF
+          tell application "Finder"
+            tell disk "${DMG_NAME}"
+              open
+              set current view of container window to icon view
+              set toolbar visible of container window to false
+              set statusbar visible of container window to false
+              set the bounds of container window to {400, 200, 900, 520}
+              set theViewOptions to the icon view options of container window
+              set arrangement of theViewOptions to not arranged
+              set icon size of theViewOptions to 72
+              set position of item "WEditor.app" of container window to {160, 140}
+              set position of item "Applications" of container window to {340, 140}
+              close
+              open
+              update without registering applications
+              delay 1
+              close
+            end tell
+          end tell
+          EOF
+          echo "Finder layout applied"
+
+          # 卸载 DMG
+          hdiutil detach "/Volumes/${DMG_NAME}" -force 2>/dev/null || true
+          sleep 1
+
+          # 转换为压缩只读 DMG
+          hdiutil convert "$RW_DMG" -format UDZO -imagekey zlib-level=9 -o "$OUTPUT_DMG" -quiet
+
+          # 清理
+          rm -f "$RW_DMG"
+          rm -rf "$STAGING"
+
+          echo "=== DMG created: $OUTPUT_DMG ==="
+          ls -lh "$OUTPUT_DMG"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -100,7 +168,7 @@ jobs:
           path: artifacts
 
       - name: Debug - List artifacts directory
-        run: ls -la artifacts/ artifacts/*
+        run: ls -laR artifacts/
 
       - name: Set release information
         id: release_info
@@ -120,16 +188,25 @@ jobs:
 
       - name: Rename build artifacts
         run: |
-          # Rename Windows artifact
-          mv artifacts/build-windows-latest/Weditor.exe artifacts/build-windows-latest/Weditor-windows.exe
-          
-          # Rename macOS artifact
+          # Windows
+          mv artifacts/build-windows-latest/Weditor.exe artifacts/build-windows-latest/Weditor-windows.exe 2>/dev/null || true
+
+          # macOS: 保留 DMG 并 zip app
           cd artifacts/build-macos-latest
-          zip -r Weditor-macos.app.zip Weditor.app
+          DMG_FILE=$(ls WEditor-*.dmg 2>/dev/null | head -1)
+          if [ -n "$DMG_FILE" ]; then
+            echo "Found DMG: $DMG_FILE"
+            mv "$DMG_FILE" "../$DMG_FILE"
+          fi
+          zip -r Weditor-macos.app.zip Weditor.app 2>/dev/null || true
           cd ../..
-          
-          # Rename Linux artifact
-          mv artifacts/build-ubuntu-latest/Weditor artifacts/build-ubuntu-latest/Weditor-linux
+
+          # Linux
+          mv artifacts/build-ubuntu-latest/Weditor artifacts/build-ubuntu-latest/Weditor-linux 2>/dev/null || true
+
+          # 汇总所有要上传的文件到 artifacts/ 目录
+          echo "=== Final artifacts ==="
+          find artifacts -type f -not -path '*/\.[!.]*' | sort
 
       - name: Create Release and Upload Assets
         uses: softprops/action-gh-release@v2
@@ -143,6 +220,7 @@ jobs:
           files: |
             artifacts/build-windows-latest/Weditor-windows.exe
             artifacts/build-macos-latest/Weditor-macos.app.zip
+            artifacts/WEditor-*.dmg
             artifacts/build-ubuntu-latest/Weditor-linux
           generate_release_notes: false
           fail_on_unmatched_files: false

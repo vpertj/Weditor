@@ -39,6 +39,7 @@
             <string>Owner</string>
             <key>LSItemContentTypes</key>
             <array>
+                <string>com.weditor.markdown</string>
                 <string>net.daringfireball.markdown</string>
             </array>
             <key>CFBundleTypeExtensions</key>
@@ -75,5 +76,33 @@
     <true/>
     <key>NSRequiresAquaSystemAppearance</key>
     <false/>
+    <!-- UTI 声明：让 LaunchServices 能把 .md 等扩展名关联到本应用 -->
+    <key>UTExportedTypeDeclarations</key>
+    <array>
+        <dict>
+            <key>UTTypeIdentifier</key>
+            <string>com.weditor.markdown</string>
+            <key>UTTypeDescription</key>
+            <string>Markdown 文档</string>
+            <key>UTTypeConformsTo</key>
+            <array>
+                <string>public.plain-text</string>
+                <string>public.text</string>
+                <string>public.data</string>
+            </array>
+            <key>UTTypeTagSpecification</key>
+            <dict>
+                <key>public.filename-extension</key>
+                <array>
+                    <string>md</string>
+                    <string>markdown</string>
+                    <string>mdown</string>
+                    <string>mkd</string>
+                </array>
+            </dict>
+            <key>UTTypeIconFile</key>
+            <string>iconfile.icns</string>
+        </dict>
+    </array>
 </dict>
 </plist>

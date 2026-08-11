@@ -376,20 +376,6 @@ const handleFileChosen = async (e) => {
   overflow: hidden;
 }
 
-/* 左侧应用头部 */
-.app-header {
-  width: 80px;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 20px 0;
-  background-color: var(--bg-secondary);
-  border-right: 1px solid var(--border-light);
-  box-sizing: border-box;
-}
-
 /* 右侧主内容区域 */
 .app-content {
   flex: 1;

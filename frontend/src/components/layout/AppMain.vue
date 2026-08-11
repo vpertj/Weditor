@@ -34,6 +34,39 @@
         @update:model-value="$emit('update:markdown-content', $event)"
         class="editor-content"
       />
+
+      <!-- 空状态引导卡片 -->
+      <div v-if="!markdownContent && showEmptyGuide" class="empty-guide" @click="showEmptyGuide = false">
+        <div class="empty-guide-card" @click.stop>
+          <h3>{{ $t('main.emptyGuide.title') }}</h3>
+          <p class="guide-subtitle">{{ $t('main.emptyGuide.subtitle') }}</p>
+
+          <div class="guide-section">
+            <h4>{{ $t('main.emptyGuide.shortcutsTitle') }}</h4>
+            <ul class="guide-shortcuts">
+              <li><kbd>⌘/Ctrl N</kbd><span>{{ $t('main.emptyGuide.shortcutNew') }}</span></li>
+              <li><kbd>⌘/Ctrl O</kbd><span>{{ $t('main.emptyGuide.shortcutOpen') }}</span></li>
+              <li><kbd>⌘/Ctrl S</kbd><span>{{ $t('main.emptyGuide.shortcutSave') }}</span></li>
+              <li><kbd>⌘/Ctrl 1-3</kbd><span>{{ $t('main.emptyGuide.shortcutView') }}</span></li>
+            </ul>
+          </div>
+
+          <div class="guide-section">
+            <h4>{{ $t('main.emptyGuide.syntaxTitle') }}</h4>
+            <div class="guide-syntax">
+              <code>{{ $t('main.emptyGuide.syntaxHeading') }}</code>
+              <code>{{ $t('main.emptyGuide.syntaxBold') }}</code>
+              <code>{{ $t('main.emptyGuide.syntaxList') }}</code>
+              <code>{{ $t('main.emptyGuide.syntaxCode') }}</code>
+            </div>
+          </div>
+
+          <div class="guide-actions">
+            <button class="btn-guide-primary" @click="$emit('load-sample')">{{ $t('main.emptyGuide.loadSample') }}</button>
+            <button class="btn-guide-ghost" @click="showEmptyGuide = false">{{ $t('main.emptyGuide.close') }}</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- 右侧：预览/WYSIWYG 面板 -->
@@ -75,7 +108,7 @@
 import MarkdownEditor from '../MarkdownEditor.vue'
 import PreviewPane from '../PreviewPane.vue'
 import WysiwygPane from '../WysiwygPane.vue'
-import { } from 'vue'
+import { ref, watch } from 'vue'
 
 const props = defineProps({
   markdownContent: {
@@ -100,6 +133,12 @@ const emit = defineEmits([
   'import-markdown',
   'toggle-sync-scroll'
 ])
+
+// 空状态引导卡片：首次进入且内容为空时显示；一旦开始输入内容即永久隐藏（一次性引导）
+const showEmptyGuide = ref(true)
+watch(() => props.markdownContent, (val) => {
+  if (val) showEmptyGuide.value = false
+})
 </script>
 
 <style scoped>
@@ -299,5 +338,143 @@ const emit = defineEmits([
 .editor-content::-webkit-scrollbar-thumb:hover,
 .preview-content::-webkit-scrollbar-thumb:hover {
   background: var(--theme-primary);
+}
+
+/* 空状态引导卡片 */
+.empty-guide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(2px);
+  z-index: 10;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.empty-guide-card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--theme-bg-primary, #ffffff);
+  border-radius: 16px;
+  border: 1px solid var(--theme-border-light, #e0e0e0);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  padding: 28px;
+  text-align: center;
+}
+
+.empty-guide-card h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--theme-text-primary, #1e293b);
+}
+
+.guide-subtitle {
+  margin: 0 0 20px;
+  font-size: 13px;
+  color: var(--theme-text-secondary, #64748b);
+  line-height: 1.5;
+}
+
+.guide-section {
+  text-align: left;
+  margin-bottom: 18px;
+}
+
+.guide-section h4 {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--theme-text-secondary, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.guide-shortcuts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.guide-shortcuts li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--theme-text-primary, #1e293b);
+}
+
+.guide-shortcuts kbd {
+  display: inline-block;
+  min-width: 72px;
+  padding: 3px 8px;
+  font-family: inherit;
+  font-size: 11px;
+  text-align: center;
+  color: var(--theme-text-secondary, #475569);
+  background: var(--theme-bg-secondary, #f1f5f9);
+  border: 1px solid var(--theme-border-light, #e2e8f0);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+}
+
+.guide-syntax {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.guide-syntax code {
+  padding: 4px 10px;
+  font-size: 12px;
+  color: var(--theme-primary, #3b82f6);
+  background: var(--theme-primary-15, rgba(59, 130, 246, 0.1));
+  border-radius: 8px;
+}
+
+.guide-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.btn-guide-primary {
+  padding: 9px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--theme-primary, #3b82f6);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-guide-primary:hover {
+  background: var(--theme-primary-hover, #2563eb);
+  transform: translateY(-1px);
+}
+
+.btn-guide-ghost {
+  padding: 9px 16px;
+  font-size: 13px;
+  color: var(--theme-text-secondary, #64748b);
+  background: transparent;
+  border: 1px solid var(--theme-border-light, #e0e0e0);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-guide-ghost:hover {
+  color: var(--theme-text-primary, #1e293b);
+  border-color: var(--theme-text-secondary, #94a3b8);
 }
 </style>

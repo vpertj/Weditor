@@ -10,7 +10,10 @@
     "view": {
       "both": "Editor + Preview",
       "editor": "Editor Only",
-      "wysiwyg": "WYSIWYG (Editable)"
+      "wysiwyg": "WYSIWYG (Editable)",
+      "bothShort": "Split",
+      "editorShort": "Source",
+      "wysiwygShort": "Visual"
     },
     "settings": "Settings",
     "guide": "Markdown Guide",
@@ -29,6 +32,22 @@
       "wysiwyg": "WYSIWYG",
       "preview": "Preview",
       "syncScroll": "Sync scroll"
+    },
+    "emptyGuide": {
+      "title": "Welcome to WEditor",
+      "subtitle": "Start from a blank page, or load a sample to get going",
+      "shortcutsTitle": "Shortcuts",
+      "shortcutNew": "New document",
+      "shortcutOpen": "Open file",
+      "shortcutSave": "Save",
+      "shortcutView": "Switch view",
+      "syntaxTitle": "Markdown basics",
+      "syntaxHeading": "# Heading",
+      "syntaxBold": "**bold**",
+      "syntaxList": "- List",
+      "syntaxCode": "`code`",
+      "loadSample": "Load sample content",
+      "close": "Close"
     }
   },
   "footer": {

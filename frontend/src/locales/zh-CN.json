@@ -10,7 +10,10 @@
     "view": {
       "both": "编辑器 + 预览",
       "editor": "仅显示编辑器",
-      "wysiwyg": "所见即所得（可编辑）"
+      "wysiwyg": "所见即所得（可编辑）",
+      "bothShort": "分栏",
+      "editorShort": "源码",
+      "wysiwygShort": "排版"
     },
     "settings": "设置",
     "guide": "语法指南",
@@ -29,6 +32,22 @@
       "wysiwyg": "所见即所得",
       "preview": "预览",
       "syncScroll": "同步滚动"
+    },
+    "emptyGuide": {
+      "title": "欢迎使用 WEditor",
+      "subtitle": "从空白开始，或加载示例内容快速上手",
+      "shortcutsTitle": "常用快捷键",
+      "shortcutNew": "新建文档",
+      "shortcutOpen": "打开文件",
+      "shortcutSave": "保存",
+      "shortcutView": "切换视图",
+      "syntaxTitle": "基础语法速览",
+      "syntaxHeading": "# 标题",
+      "syntaxBold": "**粗体**",
+      "syntaxList": "- 列表",
+      "syntaxCode": "`代码`",
+      "loadSample": "加载示例内容",
+      "close": "关闭"
     }
   },
   "footer": {

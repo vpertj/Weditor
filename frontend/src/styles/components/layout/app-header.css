@@ -11,7 +11,7 @@
   flex-shrink: 0;
   position: relative;
   overflow: visible;
-  width: 80px;
+  width: 64px;
   height: 100vh;
   -webkit-app-region: drag;
   user-select: none;
@@ -131,7 +131,7 @@
 
 .app-header.vertical .view-toggle-btn {
   width: 48px;
-  height: 48px;
+  height: 56px;
   border-radius: 12px;
   background: var(--gray-100);
   border: none;
@@ -139,14 +139,35 @@
   color: var(--text-secondary);
   transition: all 0.2s ease;
   -webkit-app-region: no-drag;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 4px 0;
+}
+
+/* 视图切换按钮文字标签 */
+.view-toggle-label {
+  font-size: 10px;
+  line-height: 1;
+  color: inherit;
+  max-width: 48px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.view-toggle-btn.active .view-toggle-label {
+  color: white;
 }
 
 /* 优化header-btn样式，使其更适合垂直工具栏 */
 .app-header.vertical .header-btn {
   width: 48px;
-  height: 48px;
-  padding: 0;
-  gap: 0;
+  height: 56px;
+  padding: 4px 0;
+  gap: 3px;
   border-radius: 12px;
   margin: 0;
   background: var(--gray-100);
@@ -155,6 +176,7 @@
   color: var(--text-secondary);
   transition: all 0.2s ease;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
 }
@@ -328,17 +350,23 @@
   color: var(--theme-primary-dark);
 }
 
-/* 文字样式 - 跟随主题色 */
+/* 文字样式 - 显示为图标下方小标签 */
 .header-btn span {
-  display: none;
+  display: block;
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 500;
+  color: var(--text-secondary);
+  max-width: 48px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.header-btn:hover span {
+.app-header.vertical .header-btn:hover span,
+.app-header.vertical .header-btn.active span {
   font-weight: 700;
-}
-
-.header-btn.active span {
-  font-weight: 700;
+  color: inherit;
 }
 
 /* 焦点状态（无障碍） - 简洁焦点环 */

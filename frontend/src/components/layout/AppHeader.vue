@@ -22,6 +22,7 @@
           <svg viewBox="0 0 24 24" width="16" height="16">
             <path fill="currentColor" d="M3,3H11V5H3V3M13,3H21V5H13V3M3,7H11V9H3V7M13,7H21V9H13V7M3,11H11V13H3V11M13,11H21V13H13V11M3,15H11V17H3V15M13,15H21V17H13V15M3,19H11V21H3V19Z"/>
           </svg>
+          <span class="view-toggle-label">{{ $t('header.view.bothShort') }}</span>
         </button>
         <button
           :class="['view-toggle-btn', { 'active': viewMode === 'editor' }]"
@@ -31,6 +32,7 @@
           <svg viewBox="0 0 24 24" width="16" height="16">
             <path fill="currentColor" d="M14.6,16.6L19.2,12L14.6,7.4L16,6L22,12L16,18L14.6,16.6M9.4,16.6L4.8,12L9.4,7.4L8,6L2,12L8,18L9.4,16.6Z"/>
           </svg>
+          <span class="view-toggle-label">{{ $t('header.view.editorShort') }}</span>
         </button>
         <button
           :class="['view-toggle-btn', { 'active': viewMode === 'wysiwyg' }]"
@@ -40,6 +42,7 @@
           <svg viewBox="0 0 24 24" width="16" height="16">
             <path fill="currentColor" d="M3 5h18v2H3V5m0 4h18v2H3V9m0 4h10v2H3v-2z"/>
           </svg>
+          <span class="view-toggle-label">{{ $t('header.view.wysiwygShort') }}</span>
         </button>
       </div>
 

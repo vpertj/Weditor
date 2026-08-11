@@ -243,10 +243,6 @@ func (a *App) GetPlatform() string {
 // 通知/事件（前端通过 Events 系统通信）
 // ==========================================
 
-// EmitMenuEvent 发送菜单事件到前端（由菜单回调触发）
-func (a *App) EmitMenuEvent(eventName string) {
-	wailsRuntime.EventsEmit(a.ctx, eventName)
-}
 
 // ==========================================
 // 内部辅助方法

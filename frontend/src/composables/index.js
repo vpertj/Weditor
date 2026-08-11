@@ -18,9 +18,6 @@ export { useUIState } from './useUIState.js';
 export { useNotification } from './useNotification.js';
 export { useClipboard } from './useClipboard.js';
 
-// Electron集成相关组合式API（保留兼容）
-export { useElectron } from './useElectron.js';
-
 // Wails 桌面集成（macOS/Windows 原生层）
 export { useWails } from './useWails.js';
 

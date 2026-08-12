@@ -25,10 +25,10 @@ func main() {
 
 	err := wails.Run(&options.App{
 		Title:     "WEditor",
-		Width:     1440,
-		Height:    768,
+		Width:     1000,
+		Height:    1200,
 		MinWidth:  800,
-		MinHeight: 500,
+		MinHeight: 900,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},

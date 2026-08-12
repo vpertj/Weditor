@@ -27,5 +27,8 @@ export { usePlatform } from './usePlatform.js';
 // 自动保存（草稿恢复 + 定时存档）
 export { useAutoSave } from './useAutoSave.js';
 
+// 窗口拖拽兜底（WKWebView 对 -webkit-app-region 支持不可靠时的 JS 方案）
+export { useWindowDrag } from './useWindowDrag.js';
+
 // 为向后兼容性保留的别名导出
 export { useEditor as useMarkdownEditor } from './editor/index.js';

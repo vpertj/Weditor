@@ -107,7 +107,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useAppState, useWails, usePlatform, useAutoSave } from './composables/index.js'
+import { useAppState, useWails, usePlatform, useAutoSave, useWindowDrag } from './composables/index.js'
 import { useGlobalThemeManager } from './composables/index.js'
 import { nextTick } from 'vue'
 import AppHeader from './components/layout/AppHeader.vue'
@@ -398,6 +398,11 @@ nextTick(async () => {
 // 主题管理器
 // ==========================================
 useGlobalThemeManager()
+
+// ==========================================
+// 窗口拖拽兜底（CSS -webkit-app-region 不可靠时的 JS 方案）
+// ==========================================
+useWindowDrag()
 
 // ==========================================
 // 导入 .md 文件（通过浏览器文件选择器）

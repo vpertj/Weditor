@@ -88,6 +88,8 @@ export function useAutoSave(contentRef, options = {}) {
         isSaving.value = true
         try {
           await saveToDisk(content)
+          // 内容已持久化到磁盘，本地草稿冗余，清除避免下次启动误弹“未保存草稿”提示
+          clearDraft()
         } catch (e) {
           console.warn('自动保存到磁盘失败:', e)
         } finally {

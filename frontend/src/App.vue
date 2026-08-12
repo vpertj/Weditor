@@ -213,12 +213,12 @@ const {
 // ==========================================
 const showDraftBanner = ref(false)
 
-nextTick(() => {
-  // 检测是否有草稿
+// 检测是否有草稿（在启动文件加载之后调用，避免双击打开文件时误弹“未保存草稿”提示）
+function checkDraftBanner() {
   if (isDraftAvailable.value && !hasContent.value) {
     showDraftBanner.value = true
   }
-})
+}
 
 function handleRecoverDraft() {
   const draft = recoverDraft()
@@ -388,6 +388,9 @@ nextTick(async () => {
     showNotification(`已打开: ${currentFileName.value}`, 'success')
   } else if (startupResult && !startupResult.success) {
     showNotification(`打开失败: ${startupResult.message}`, 'error')
+  } else {
+    // 无启动文件时才检测草稿，避免与双击打开文件冲突
+    checkDraftBanner()
   }
 })
 
@@ -465,6 +468,8 @@ const handleFileChosen = async (e) => {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   animation: draft-slide-in 0.3s ease-out;
   max-width: 500px;
+  /* 横幅悬浮于顶部，自身及其按钮不参与窗口拖拽 */
+  -webkit-app-region: no-drag;
 }
 
 .draft-banner-content {

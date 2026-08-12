@@ -1,5 +1,7 @@
 <template>
   <main class="app-main" :class="`view-mode-${viewMode}`">
+    <!-- 窗口顶部拖拽条：覆盖 .app-main 顶部 padding 空白区，实现整条顶部可拖拽移动窗口 -->
+    <div class="window-drag-strip" aria-hidden="true"></div>
     <!-- 左侧：Markdown编辑器 -->
     <div v-if="viewMode === 'both' || viewMode === 'editor'" class="editor-panel">
       <div class="panel-header">
@@ -152,6 +154,18 @@ watch(() => props.markdownContent, (val) => {
   position: relative;
 }
 
+/* 窗口顶部拖拽条：仅覆盖顶部 padding 空白区域（32px），不遮挡面板头部按钮 */
+.window-drag-strip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--spacing-4xl);
+  -webkit-app-region: drag;
+  z-index: 50;
+  /* 透明无内容，仅作为窗口拖拽区域；不设 pointer-events:none，否则拖拽命中失效 */
+}
+
 .editor-panel,
 .preview-panel {
   flex: 1;
@@ -183,6 +197,15 @@ watch(() => props.markdownContent, (val) => {
   border-bottom: 1px solid #e0e0e0;
   position: relative;
   overflow: visible; /* 允许下拉菜单溢出显示 */
+  /* 无原生标题栏（TitleBarHiddenInset），面板头部作为窗口拖拽区域 */
+  -webkit-app-region: drag;
+}
+
+/* 面板头部内的交互元素不参与拖拽，保持可点击 */
+.panel-header .panel-actions,
+.panel-header .toggle-label,
+.panel-header .btn-small {
+  -webkit-app-region: no-drag;
 }
 
 .panel-header h3 {

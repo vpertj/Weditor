@@ -203,8 +203,8 @@
 
 /* 响应式预览模式 */
 .viewport-desktop .preview-rendered {
-  max-width: none;
-  margin: 0;
+  max-width: 760px;
+  margin: 0 auto;
   border-left: none !important;
   border-right: none !important;
 }

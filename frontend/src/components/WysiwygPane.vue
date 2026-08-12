@@ -38,9 +38,14 @@ export default {
     modelValue: {
       type: String,
       default: ''
+    },
+    // 是否处于激活（所见即所得）状态：激活时同步最新内容并发出 ready
+    active: {
+      type: Boolean,
+      default: false
     }
   },
-  emits: ['update:modelValue'],
+  emits: ['update:modelValue', 'ready'],
   setup(props, { emit }) {
     const editorRoot = ref(null)
     const editorRef = ref(null)
@@ -122,31 +127,47 @@ export default {
       editorRef.value = editor
     }
 
-    // External markdown -> editor
+    // External markdown -> editor（返回是否已与最新内容同步）
+    const applyModelValue = async (val) => {
+      const editor = editorRef.value
+      if (!editor) return false
+      const incoming = normalizeMarkdown(val || '')
+      if (incoming === lastEmittedNormalized.value) return true // 已同步
+      try {
+        const current = await editor.action(getMarkdown())
+        const currentNorm = normalizeMarkdown(toPlainMarkdown(current || ''))
+        const incomingPlain = markdownToEditorInput(val || '')
+        const incomingNorm = normalizeMarkdown(incomingPlain)
+        if (currentNorm !== incomingNorm) {
+          isApplyingExternal.value = true
+          await editor.action(replaceAll(incomingPlain))
+          lastEmittedMarkdown.value = incomingPlain
+          lastEmittedNormalized.value = incomingNorm
+        }
+        return true
+      } finally {
+        setTimeout(() => { isApplyingExternal.value = false }, 30)
+      }
+    }
+
+    // 外部内容变化：同步到编辑器；激活状态下同步完成后通知 ready
     watch(
       () => props.modelValue,
       async (val, oldVal) => {
         if (val === oldVal) return
-        const editor = editorRef.value
-        if (!editor) return
-        const incoming = normalizeMarkdown(val || '')
-        if (incoming === lastEmittedNormalized.value) return
-        try {
-          const current = await editor.action(getMarkdown())
-          const currentNorm = normalizeMarkdown(toPlainMarkdown(current || ''))
-          const incomingPlain = markdownToEditorInput(val || '')
-          const incomingNorm = normalizeMarkdown(incomingPlain)
-          if (currentNorm !== incomingNorm) {
-            isApplyingExternal.value = true
-            await editor.action(replaceAll(incomingPlain))
-            lastEmittedMarkdown.value = incomingPlain
-            lastEmittedNormalized.value = incomingNorm
-          }
-        } finally {
-          setTimeout(() => { isApplyingExternal.value = false }, 30)
-        }
+        const synced = await applyModelValue(val)
+        if (props.active && synced) emit('ready')
       }
     )
+
+    // 进入激活状态：确保内容同步后发出 ready（编辑器未创建时由 onMounted 负责）
+    watch(() => props.active, async (act) => {
+      if (!act) return
+      if (editorRef.value) {
+        await applyModelValue(props.modelValue)
+        emit('ready')
+      }
+    })
 
     // React to theme changes; actual variables are applied globally
     watch([currentColorTheme, currentCodeStyle, currentFontSettings, currentLayoutId], () => {}, { deep: true })
@@ -155,6 +176,8 @@ export default {
       initialize()
       await createEditor()
       setupInlineCodeObserver()
+      // 编辑器已创建并持有最新内容，通知父组件可以切换到所见即所得
+      emit('ready')
     })
 
     onBeforeUnmount(() => {

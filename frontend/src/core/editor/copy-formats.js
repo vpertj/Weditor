@@ -9,7 +9,7 @@
 
 import { parseMarkdown } from '../markdown/parser/index.js';
 import { copyToSocialClean } from './clipboard.js';
-import mermaid from 'mermaid';
+// mermaid 按需动态加载（仅在复制内容含 .mermaid 块时引入），不阻塞应用启动
 
 /**
  * 运行 mermaid，将容器内的 mermaid 元素转换为 SVG
@@ -17,6 +17,7 @@ import mermaid from 'mermaid';
  */
 async function renderMermaidInContainer(container) {
   try {
+    const { default: mermaid } = await import('mermaid');
     mermaid.initialize({
       startOnLoad: false,
       securityLevel: 'strict',

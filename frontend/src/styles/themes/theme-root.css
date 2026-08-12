@@ -19,7 +19,7 @@
   /* Markdown字体设置 - 初始值，会被主题管理器动态覆盖 */
   --markdown-font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
   --markdown-font-size: 16px;
-  --markdown-line-height: 1.6;
+  --markdown-line-height: 1.75;
 
   /* 主色调 - 默认值，运行时由 theme-loader/manager 覆盖 */
   --theme-primary: #312C20;

@@ -38,7 +38,7 @@ export const THEME_DEFAULTS = {
   FONT_FAMILY: 'system-default',
   FONT_SIZE: 16,
   LETTER_SPACING: 0, // px
-  LINE_HEIGHT: 1.6,
+  LINE_HEIGHT: 1.75,
 
   // 自动切换
   AUTO_SWITCH: true,

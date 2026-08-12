@@ -80,6 +80,7 @@
           </svg>
           {{ viewMode === 'wysiwyg' ? $t('main.preview.wysiwyg') : $t('main.preview.preview') }}
         </h3>
+        <span v-if="viewMode === 'wysiwyg' && !wysiwygReady" class="wysiwyg-warming-badge">排版编辑器初始化中…</span>
         <div class="panel-actions" v-if="viewMode !== 'wysiwyg'">
           <!-- 同步滚动开关（移自 Footer） -->
           <label class="toggle-label" :title="$t('main.preview.syncScroll')">
@@ -95,11 +96,22 @@
         </div>
       </div>
 
-      <component
-        :is="viewMode === 'wysiwyg' ? WysiwygPane : PreviewPane"
-        v-bind="viewMode === 'wysiwyg' ? { modelValue: markdownContent } : { markdown: markdownContent, syncScrollEnabled }"
-        @update:model-value="(val) => $emit('update:markdown-content', val)"
+      <!-- 快速预览：非 wysiwyg 模式，或 wysiwyg 尚未就绪时显示（保证内容 ms 级可见） -->
+      <PreviewPane
+        v-show="viewMode !== 'wysiwyg' || !wysiwygReady"
+        :markdown="markdownContent"
+        :sync-scroll-enabled="syncScrollEnabled"
         @html-generated="(val) => viewMode !== 'wysiwyg' && $emit('html-generated', val)"
+        class="preview-content"
+      />
+      <!-- 所见即所得（Milkdown）：后台预热，就绪后无缝切换 -->
+      <WysiwygPane
+        v-if="wysiwygEverMounted"
+        v-show="viewMode === 'wysiwyg' && wysiwygReady"
+        :model-value="markdownContent"
+        :active="viewMode === 'wysiwyg'"
+        @update:model-value="(val) => $emit('update:markdown-content', val)"
+        @ready="wysiwygReady = true"
         class="preview-content"
       />
     </div>
@@ -109,8 +121,10 @@
 <script setup>
 import MarkdownEditor from '../MarkdownEditor.vue'
 import PreviewPane from '../PreviewPane.vue'
-import WysiwygPane from '../WysiwygPane.vue'
-import { ref, watch } from 'vue'
+import { ref, watch, defineAsyncComponent } from 'vue'
+// WysiwygPane 依赖 milkdown/prosemirror（体积大）：仅在切换到所见即所得模式时按需加载，
+// 避免拖慢首屏与双击打开速度
+const WysiwygPane = defineAsyncComponent(() => import('../WysiwygPane.vue'))
 
 const props = defineProps({
   markdownContent: {
@@ -140,6 +154,21 @@ const emit = defineEmits([
 const showEmptyGuide = ref(true)
 watch(() => props.markdownContent, (val) => {
   if (val) showEmptyGuide.value = false
+})
+
+// ==========================================
+// WYSIWYG 混合模式：进入所见即所得时先用快速预览立刻显示内容，
+// Milkdown 在后台预热（就绪后 emit ready），再无缝切换到所见即所得。
+// ==========================================
+const wysiwygReady = ref(false)
+const wysiwygEverMounted = ref(false)
+
+watch(() => props.viewMode, (mode) => {
+  if (mode === 'wysiwyg') {
+    wysiwygEverMounted.value = true
+    // 每次进入都重新走「预览 → 就绪 → 切换」流程，避免显示过期内容
+    wysiwygReady.value = false
+  }
 })
 </script>
 
@@ -220,6 +249,35 @@ watch(() => props.markdownContent, (val) => {
 
 .panel-header h3 svg {
   opacity: 0.7;
+}
+
+/* 排版编辑器初始化徽标 */
+.wysiwyg-warming-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--theme-text-secondary);
+  background: var(--theme-bg-tertiary);
+  border: 1px solid var(--theme-border-light);
+  border-radius: 999px;
+  padding: 3px 10px;
+  margin-left: 8px;
+  -webkit-app-region: no-drag;
+}
+
+.wysiwyg-warming-badge::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 2px solid var(--theme-primary-25);
+  border-top-color: var(--theme-primary);
+  animation: wysiwyg-spin 0.8s linear infinite;
+}
+
+@keyframes wysiwyg-spin {
+  to { transform: rotate(360deg); }
 }
 
 .panel-actions {

@@ -51,7 +51,26 @@ import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { parseMarkdown } from '../core/markdown/parser/coordinator.js'
 import { useGlobalThemeManager } from '../composables/index.js'
 import { escapeHtml as sharedEscapeHtml } from '../shared/utils/text.js'
-import mermaid from 'mermaid'
+// mermaid 按需动态加载（仅文档含 .mermaid 块时引入），不阻塞首屏
+
+// 预览专用：剥离微信导出的内联 style 属性，让 CSS 主题系统完全接管预览排版。
+// - 仅作用于预览 DOM，不影响公众号导出 HTML（导出仍用 formatter 的内联样式）
+// - pre 代码块内部的语法高亮 span / 红绿灯保留，只处理块级与常用内联标签
+const PREVIEW_STRIP_SELECTOR = [
+  'p', 'strong', 'em', 'a', 'blockquote',
+  'table', 'thead', 'tbody', 'tr', 'th', 'td',
+  'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+  'hr', 'img', 'del', 'code'
+].join(',')
+function stripExportStyles(rootEl) {
+  const root = rootEl || document.querySelector('.preview-rendered')
+  if (!root) return
+  root.querySelectorAll(PREVIEW_STRIP_SELECTOR).forEach((el) => {
+    // 代码块内部不处理（语法高亮、红绿灯按钮、滚动容器等依赖内联样式）
+    if (el.closest('pre')) return
+    el.removeAttribute('style')
+  })
+}
 
 // 通用防抖工具函数
 function debounce(fn, delay = 300) {
@@ -318,37 +337,42 @@ export default {
 
         // 等待DOM更新后再渲染 Mermaid
         await nextTick()
-        try {
-          mermaid.initialize({
-            startOnLoad: false,
-            securityLevel: 'strict',
-            deterministicIds: true,
-            deterministicIDSeed: 'preview-mermaid',
-            flowchart: {
-              htmlLabels: false, // 重要：避免使用 foreignObject，以适配公众号
-              useMaxWidth: true
-            },
-            themeVariables: {
-              fontFamily: '"Microsoft YaHei", "微软雅黑", Arial, sans-serif'
+
+        // 剥离微信导出内联样式（预览专用），使 CSS 主题完全接管排版
+        stripExportStyles(previewContent.value)
+
+        // Mermaid 按需加载：仅当文档包含 .mermaid 块时才动态引入（降低首屏启动开销）
+        const containerEl = document.querySelector('.preview-rendered')
+        if (containerEl && containerEl.querySelectorAll('.mermaid').length > 0) {
+          try {
+            const { default: mermaid } = await import('mermaid')
+            mermaid.initialize({
+              startOnLoad: false,
+              securityLevel: 'strict',
+              deterministicIds: true,
+              deterministicIDSeed: 'preview-mermaid',
+              flowchart: {
+                htmlLabels: false, // 重要：避免使用 foreignObject，以适配公众号
+                useMaxWidth: true
+              },
+              themeVariables: {
+                fontFamily: '"Microsoft YaHei", "微软雅黑", Arial, sans-serif'
+              }
+            })
+
+            // 快速合法性检查：首个有效行必须是已知图类型指令
+            const isLikelyMermaid = (def) => {
+              const lines = (def || '').split(/\r?\n/).map(l => l.trim()).filter(Boolean)
+              // 过滤掉可能的 init 指令与注释
+              const first = lines.find(l => !/^%%/.test(l) && !/^%%\{.*\}%%$/.test(l)) || ''
+              const starters = [
+                'graph', 'flowchart', 'sequenceDiagram', 'classDiagram', 'stateDiagram',
+                'erDiagram', 'gantt', 'journey', 'pie', 'gitGraph', 'mindmap', 'timeline',
+                'requirementDiagram', 'sankey', 'xychart-beta', 'block-beta', 'zenuml'
+              ]
+              return starters.some(s => first.startsWith(s))
             }
-          })
 
-          // 快速合法性检查：首个有效行必须是已知图类型指令
-          const isLikelyMermaid = (def) => {
-            const lines = (def || '').split(/\r?\n/).map(l => l.trim()).filter(Boolean)
-            // 过滤掉可能的 init 指令与注释
-            const first = lines.find(l => !/^%%/.test(l) && !/^%%\{.*\}%%$/.test(l)) || ''
-            const starters = [
-              'graph', 'flowchart', 'sequenceDiagram', 'classDiagram', 'stateDiagram',
-              'erDiagram', 'gantt', 'journey', 'pie', 'gitGraph', 'mindmap', 'timeline',
-              'requirementDiagram', 'sankey', 'xychart-beta', 'block-beta', 'zenuml'
-            ]
-            return starters.some(s => first.startsWith(s))
-          }
-
-          // 先清理已渲染的 SVG/占位符，避免重复堆积
-          const containerEl = document.querySelector('.preview-rendered')
-          if (containerEl) {
             // 清理上一次渲染插入的 SVG 与错误提示块，避免越堆越多
             containerEl.querySelectorAll('.mermaid svg, .mermaid-error, .mermaid-error-hidden').forEach(n => n.remove())
 
@@ -400,9 +424,9 @@ export default {
             } finally {
               sandbox.remove()
             }
+          } catch (merr) {
+            console.warn('Mermaid 渲染失败:', merr)
           }
-        } catch (merr) {
-          console.warn('Mermaid 渲染失败:', merr)
         }
 
         // 3. 发送给父组件
@@ -427,10 +451,16 @@ export default {
       processMarkdown()
     }, 300)
 
-    // 监听markdown内容变化 - 300ms防抖，避免逐键触发完整渲染
-    watch(() => props.markdown, () => {
+    // 监听markdown内容变化
+    // - 从空到非空（加载文件/示例）：立即渲染，不等待防抖，提升打开速度感知
+    // - 其它情况（输入）：300ms 防抖，避免逐键触发完整渲染
+    watch(() => props.markdown, (newVal, oldVal) => {
       invalidateThemeCache()
-      processMarkdownDebounced()
+      if (newVal && !oldVal) {
+        processMarkdown()
+      } else {
+        processMarkdownDebounced()
+      }
     })
 
     // 合并所有主题相关 watcher 为一个，300ms 防抖，避免启动时多次级联渲染

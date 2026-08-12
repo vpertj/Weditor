@@ -127,27 +127,44 @@ export default {
       editorRef.value = editor
     }
 
-    // External markdown -> editor（返回是否已与最新内容同步）
-    const applyModelValue = async (val) => {
+    // 外部内容同步串行化：避免多次拖入/输入期间并发执行 replaceAll，
+    // 导致 ProseMirror 状态错乱（乱码）；同步期间的新内容按序排队，
+    // 过期的同步结果不再发 ready（由最新一次负责）
+    let syncChain = Promise.resolve()
+    let syncVersion = 0
+
+    const doApplyModelValue = async (val) => {
       const editor = editorRef.value
-      if (!editor) return false
+      if (!editor) return true
       const incoming = normalizeMarkdown(val || '')
       if (incoming === lastEmittedNormalized.value) return true // 已同步
-      try {
-        const current = await editor.action(getMarkdown())
-        const currentNorm = normalizeMarkdown(toPlainMarkdown(current || ''))
-        const incomingPlain = markdownToEditorInput(val || '')
-        const incomingNorm = normalizeMarkdown(incomingPlain)
-        if (currentNorm !== incomingNorm) {
-          isApplyingExternal.value = true
+      const current = await editor.action(getMarkdown())
+      const currentNorm = normalizeMarkdown(toPlainMarkdown(current || ''))
+      const incomingPlain = markdownToEditorInput(val || '')
+      const incomingNorm = normalizeMarkdown(incomingPlain)
+      if (currentNorm !== incomingNorm) {
+        isApplyingExternal.value = true
+        try {
           await editor.action(replaceAll(incomingPlain))
           lastEmittedMarkdown.value = incomingPlain
           lastEmittedNormalized.value = incomingNorm
+        } finally {
+          setTimeout(() => { isApplyingExternal.value = false }, 30)
         }
-        return true
-      } finally {
-        setTimeout(() => { isApplyingExternal.value = false }, 30)
       }
+      return true
+    }
+
+    // 返回 Promise<boolean>：本次同步是否为最新内容（是则应由它发 ready）
+    const applyModelValue = (val) => {
+      const version = ++syncVersion
+      syncChain = syncChain
+        .catch(() => {}) // 前一次失败不阻塞后续
+        .then(async () => {
+          await doApplyModelValue(val)
+          return version === syncVersion
+        })
+      return syncChain
     }
 
     // 外部内容变化：同步到编辑器；激活状态下同步完成后通知 ready

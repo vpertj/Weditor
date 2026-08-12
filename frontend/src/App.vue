@@ -179,17 +179,26 @@ const fileOpenTick = ref(0)
 // 捕获阶段拦截 DOM 层的文件 drop/dragover，避免 ProseMirror/CodeMirror
 // 把文件当作内容插入编辑器导致乱码；选中文字的拖拽（无文件）不受影响。
 // ==========================================
+// 判断拖拽是否携带文件（files 与 items 双保险，兼容不同拖放来源）
+const isFileDrag = (dt) => {
+  if (!dt) return false
+  if (dt.files && dt.files.length > 0) return true
+  if (dt.items) {
+    for (const item of dt.items) {
+      if (item.kind === 'file') return true
+    }
+  }
+  return false
+}
 document.addEventListener('dragover', (e) => {
-  const dt = e.dataTransfer
-  if (dt && dt.files && dt.files.length > 0) {
+  if (isFileDrag(e.dataTransfer)) {
     // 允许拖放（显示 + 光标），实际由原生层打开文件
     e.preventDefault()
-    if (dt.dropEffect !== undefined) dt.dropEffect = 'copy'
+    if (e.dataTransfer.dropEffect !== undefined) e.dataTransfer.dropEffect = 'copy'
   }
 }, true)
 document.addEventListener('drop', (e) => {
-  const dt = e.dataTransfer
-  if (dt && dt.files && dt.files.length > 0) {
+  if (isFileDrag(e.dataTransfer)) {
     e.preventDefault()
     e.stopPropagation()
   }

@@ -175,6 +175,27 @@ const {
 const fileOpenTick = ref(0)
 
 // ==========================================
+// 文件拖放保护：文件拖入窗口由 Wails 原生层处理（OnFileDrop 打开文件）。
+// 捕获阶段拦截 DOM 层的文件 drop/dragover，避免 ProseMirror/CodeMirror
+// 把文件当作内容插入编辑器导致乱码；选中文字的拖拽（无文件）不受影响。
+// ==========================================
+document.addEventListener('dragover', (e) => {
+  const dt = e.dataTransfer
+  if (dt && dt.files && dt.files.length > 0) {
+    // 允许拖放（显示 + 光标），实际由原生层打开文件
+    e.preventDefault()
+    if (dt.dropEffect !== undefined) dt.dropEffect = 'copy'
+  }
+}, true)
+document.addEventListener('drop', (e) => {
+  const dt = e.dataTransfer
+  if (dt && dt.files && dt.files.length > 0) {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+}, true)
+
+// ==========================================
 // 桌面集成 (Wails)
 // ==========================================
 const {

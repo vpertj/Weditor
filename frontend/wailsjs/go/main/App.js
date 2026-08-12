@@ -10,10 +10,6 @@ export function ClearRecentFiles() {
   return window['go']['main']['App']['ClearRecentFiles']();
 }
 
-export function EmitMenuEvent(arg1) {
-  return window['go']['main']['App']['EmitMenuEvent'](arg1);
-}
-
 export function ExportHTML(arg1, arg2) {
   return window['go']['main']['App']['ExportHTML'](arg1, arg2);
 }
@@ -34,8 +30,16 @@ export function GetRecentFiles() {
   return window['go']['main']['App']['GetRecentFiles']();
 }
 
+export function GetStartupFile() {
+  return window['go']['main']['App']['GetStartupFile']();
+}
+
 export function Greet(arg1) {
   return window['go']['main']['App']['Greet'](arg1);
+}
+
+export function MarkFrontendReady() {
+  return window['go']['main']['App']['MarkFrontendReady']();
 }
 
 export function OpenFileDialog() {

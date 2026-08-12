@@ -26,10 +26,11 @@ type RecentFile struct {
 
 // App struct
 type App struct {
-	ctx         context.Context
-	appDataDir  string
-	recentFiles []RecentFile
-	startupFile string // 通过 Finder 双击 / 命令行参数打开的文件
+	ctx            context.Context
+	appDataDir     string
+	recentFiles    []RecentFile
+	startupFile    string // 通过 Finder 双击 / 命令行参数打开的文件
+	frontendReady  bool   // 前端是否已就绪（已注册事件监听）
 }
 
 // NewApp creates a new App application struct
@@ -74,13 +75,25 @@ func (a *App) GetStartupFile() string {
 	return path
 }
 
+// MarkFrontendReady 前端在注册完 app-file-open 事件监听后调用。
+// 此后通过 Apple Events 打开的文件将直接推送给前端；
+// 此前到达的文件事件则暂存在 startupFile，由前端启动时经 GetStartupFile 获取，避免冷启动竞态丢失。
+func (a *App) MarkFrontendReady() {
+	a.frontendReady = true
+}
+
 // handleFileOpen 处理通过 Apple Events 打开的文件（Finder 双击 / 已运行实例）
-// 若窗口上下文尚未就绪则暂存，由前端启动时经 GetStartupFile 获取；否则直接推送事件
+// 与 parseStartupArgs 一致：仅接受受支持的 Markdown/文本文件且文件存在
+// 若窗口上下文尚未就绪或前端尚未注册监听，则暂存，由前端启动时经 GetStartupFile 获取；否则直接推送事件
 func (a *App) handleFileOpen(filePath string) {
 	if filePath == "" {
 		return
 	}
-	if a.ctx == nil {
+	if !isMarkdownFile(filePath) || !fileExists(filePath) {
+		return
+	}
+	filePath = filepath.Clean(filePath)
+	if a.ctx == nil || !a.frontendReady {
 		a.startupFile = filePath
 		return
 	}

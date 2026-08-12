@@ -239,6 +239,29 @@ ___
 
 🎯 **测试目标**：检查所有格式在社交平台中的显示效果和兼容性。`
 
+// 默认内容开关（模块级单例，localStorage 持久化，默认启用）
+const DEFAULT_CONTENT_KEY = 'weditor.defaultContentEnabled'
+
+const getDefaultContentEnabled = () => {
+  try {
+    const stored = localStorage.getItem(DEFAULT_CONTENT_KEY)
+    return stored === null ? true : stored === 'true'
+  } catch {
+    return true
+  }
+}
+
+const enableDefaultContent = ref(getDefaultContentEnabled())
+
+const setDefaultContentEnabled = (enabled) => {
+  enableDefaultContent.value = enabled
+  try {
+    localStorage.setItem(DEFAULT_CONTENT_KEY, String(enabled))
+  } catch (error) {
+    console.warn('保存默认内容设置失败:', error)
+  }
+}
+
 /**
  * 内容状态管理 Composable
  * @param {Object} options - 配置选项
@@ -248,8 +271,8 @@ ___
 export function useContentState(options = {}) {
   const { onNotify } = options
 
-  // 状态
-  const markdownContent = ref(INITIAL_CONTENT)
+  // 状态（默认内容开关控制初始是否填充示例文档）
+  const markdownContent = ref(getDefaultContentEnabled() ? INITIAL_CONTENT : '')
   const htmlContent = ref('')
 
   // 计算属性
@@ -309,10 +332,18 @@ export function useContentState(options = {}) {
     }
   }
 
+  // 切换默认内容开关
+  const toggleDefaultContent = () => {
+    const next = !enableDefaultContent.value
+    setDefaultContentEnabled(next)
+    onNotify?.(next ? '默认内容已启用：启动时将显示默认内容' : '默认内容已禁用：启动时将显示空白文档', 'success')
+  }
+
   return {
     // 状态
     markdownContent,
     htmlContent,
+    enableDefaultContent,
 
     // 计算属性
     hasContent,
@@ -326,6 +357,8 @@ export function useContentState(options = {}) {
     updateMarkdownContent,
     updateHtmlContent,
     clearContent,
-    loadSample
+    loadSample,
+    setDefaultContentEnabled,
+    toggleDefaultContent
   }
 }

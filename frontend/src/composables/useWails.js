@@ -104,6 +104,54 @@ export function useWails() {
   }
 
   /**
+   * 按路径打开文件（Apple Events / 拖放 / 最近文件通用）
+   * 设置当前文件、窗口标题并刷新最近文件列表
+   * @param {string} filePath - 文件路径
+   */
+  const openFilePath = async (filePath) => {
+    if (!isWails.value) return { success: false, message: '不在 Wails 环境中' }
+
+    try {
+      const content = await window.go.main.App.ReadFile(filePath)
+      currentFilePath.value = filePath
+      currentFileName.value = filePath.split('/').pop() || filePath
+      isModified.value = false
+      WindowSetTitle(`WEditor - ${currentFileName.value}`)
+      await getRecentFiles()
+
+      return { success: true, filePath, content }
+    } catch (e) {
+      console.error('打开文件失败:', e)
+      return { success: false, message: e.message || '打开失败' }
+    }
+  }
+
+  /**
+   * 加载通过系统打开的文件（Finder 双击 / 命令行参数）
+   * @returns {{ success: boolean, filePath: string, content: string } | null}
+   */
+  const loadStartupFile = async () => {
+    if (!isWails.value) return null
+
+    try {
+      const startupPath = await window.go.main.App.GetStartupFile()
+      if (!startupPath) return null
+
+      const content = await window.go.main.App.ReadFile(startupPath)
+      currentFilePath.value = startupPath
+      currentFileName.value = startupPath.split('/').pop() || startupPath
+      isModified.value = false
+      WindowSetTitle(`WEditor - ${currentFileName.value}`)
+      await getRecentFiles()
+
+      return { success: true, filePath: startupPath, content }
+    } catch (e) {
+      console.error('加载系统打开的文件失败:', e)
+      return { success: false, message: e.message || '打开失败' }
+    }
+  }
+
+  /**
    * 保存文件到当前路径（无当前路径则调用另存为）
    * @param {string} content - Markdown 内容
    */
@@ -292,6 +340,8 @@ export function useWails() {
 
   /**
    * 设置文件拖放监听
+   * 注意：OnFileDrop 第二个参数 useDropTarget=false，
+   * 表示整个窗口任意位置拖放文件都会触发回调（无需 --wails-drop-target 标记）
    */
   const setupFileDropListener = (callback) => {
     if (!isWails.value) return
@@ -301,11 +351,11 @@ export function useWails() {
       if (paths && paths.length > 0 && callback) {
         // 仅处理第一个文件
         const filePath = paths[0]
-        if (/\.(md|markdown|mdown|mkd)$/i.test(filePath)) {
+        if (/\.(md|markdown|mdown|mkd|txt)$/i.test(filePath)) {
           callback(filePath)
         }
       }
-    })
+    }, false)
   }
 
   // ==========================================
@@ -356,6 +406,8 @@ export function useWails() {
     saveFile,
     saveFileAs,
     newFile,
+    openFilePath,
+    loadStartupFile,
 
     // 最近文件
     getRecentFiles,

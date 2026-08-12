@@ -13,10 +13,20 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useGlobalThemeManager } from './index.js'
 import { getColorThemeList } from '../core/theme/index.js'
+import { useContentState } from './useContentState.js'
+import { useOpenMode } from './useOpenMode.js'
 
 export function useSettingsPanel(props, emit) {
   // 使用统一主题管理器
   const themeManager = useGlobalThemeManager()
+
+  // 默认内容设置（模块级单例，共享状态）
+  const { enableDefaultContent, toggleDefaultContent } = useContentState({
+    onNotify: (message, type) => emit('show-notification', message, type)
+  })
+
+  // 默认打开方式设置（模块级单例，共享状态）
+  const { defaultOpenMode, setDefaultOpenMode, OPEN_MODES } = useOpenMode()
 
   // 解构所需功能
   const {
@@ -428,6 +438,9 @@ export function useSettingsPanel(props, emit) {
     isUsingCustomColor,
     currentCustomTheme,
     isApplyingSettings,
+    enableDefaultContent,
+    defaultOpenMode,
+    OPEN_MODES,
 
     // 计算属性
     builtinColorThemes,
@@ -451,6 +464,8 @@ export function useSettingsPanel(props, emit) {
     onColorChange,
     onColorConfirm,
     resetSelections,
-    applySettings
+    applySettings,
+    toggleDefaultContent,
+    setDefaultOpenMode
   }
 }

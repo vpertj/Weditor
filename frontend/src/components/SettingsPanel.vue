@@ -39,6 +39,17 @@
           <!-- 设置内容区域 -->
           <div class="settings-content-area">
             <div class="settings-sections">
+              <!-- 通用设置 -->
+              <section id="general" class="settings-section-wrapper">
+                <GeneralSettingsSection
+                  :enable-default-content="enableDefaultContent"
+                  :default-open-mode="defaultOpenMode"
+                  :open-modes="OPEN_MODES"
+                  @toggle-default-content="toggleDefaultContent"
+                  @select-default-open-mode="handleSelectOpenMode"
+                />
+              </section>
+
               <!-- 主题系统设置 -->
               <section id="theme-system" class="settings-section-wrapper">
                 <ThemeSystemSection
@@ -136,6 +147,7 @@ import CodeStyleSection from "./settings/CodeStyleSection.vue";
 import FontSettingsSection from "./settings/FontSettingsSection.vue";
 import FontSizeSection from "./settings/FontSizeSection.vue";
 import SpacingSettingsSection from "./settings/SpacingSettingsSection.vue";
+import GeneralSettingsSection from "./settings/GeneralSettingsSection.vue";
 import ColorPicker from "./ColorPicker.vue";
 
 // Props
@@ -164,6 +176,9 @@ const {
   currentCustomColor,
   isUsingCustomColor,
   currentCustomTheme,
+  enableDefaultContent,
+  defaultOpenMode,
+  OPEN_MODES,
 
   // 计算属性
   builtinColorThemes,
@@ -188,13 +203,23 @@ const {
   onColorConfirm,
   resetSelections,
   applySettings,
+  toggleDefaultContent,
+  setDefaultOpenMode,
 } = useSettingsPanel(props, emit);
 
 // 导航相关状态
-const activeSection = ref("theme-system");
+const activeSection = ref("general");
 
 // 导航配置
 const navigationSections = ref([
+  {
+    id: "general",
+    labelKey: 'settings.nav.general',
+    icon: {
+      viewBox: "0 0 24 24",
+      path: "M19.14,12.94C19.18,12.64 19.2,12.33 19.2,12C19.2,11.68 19.18,11.36 19.13,11.06L21.16,9.48C21.34,9.34 21.39,9.07 21.28,8.87L19.36,5.55C19.24,5.33 18.99,5.26 18.77,5.33L16.38,6.29C15.88,5.91 15.32,5.59 14.71,5.35L14.5,2.81C14.47,2.58 14.27,2.4 14.04,2.4H10.02C9.78,2.4 9.59,2.57 9.56,2.81L9.36,5.35C8.75,5.59 8.19,5.91 7.69,6.29L5.3,5.33C5.08,5.26 4.83,5.33 4.71,5.55L2.79,8.87C2.68,9.07 2.73,9.34 2.91,9.48L4.94,11.06C4.89,11.36 4.87,11.67 4.87,12C4.87,12.33 4.89,12.64 4.94,12.94L2.91,14.52C2.73,14.66 2.68,14.93 2.79,15.13L4.71,18.45C4.83,18.67 5.08,18.74 5.3,18.67L7.69,17.71C8.19,18.09 8.75,18.41 9.36,18.65L9.56,21.19C9.59,21.42 9.78,21.6 10.02,21.6H14.04C14.27,21.6 14.47,21.42 14.5,21.19L14.71,18.65C15.32,18.41 15.88,18.09 16.38,17.71L18.77,18.67C18.99,18.74 19.24,18.67 19.36,18.45L21.28,15.13C21.39,14.93 21.34,14.66 21.16,14.52L19.13,12.94M12,15.6A3.6,3.6 0 1,1 12,8.4A3.6,3.6 0 0,1 12,15.6M12,10.2A1.8,1.8 0 1,0 12,13.8A1.8,1.8 0 0,0 12,10.2Z",
+    },
+  },
   {
     id: "theme-system",
     labelKey: 'settings.nav.themeSystem',
@@ -257,6 +282,11 @@ const scrollToSection = (sectionId) => {
     activeSection.value = sectionId;
   }
 };
+
+// 选择默认打开方式（立即生效并持久化）
+function handleSelectOpenMode(mode) {
+  setDefaultOpenMode(mode);
+}
 
 // 监听滚动事件，更新当前激活的导航项
 const handleScroll = () => {

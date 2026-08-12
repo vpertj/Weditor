@@ -63,12 +63,29 @@
     },
     "nav": {
       "quick": "Quick Nav",
+      "general": "General",
       "themeSystem": "Theme System",
       "colorTheme": "Color Theme",
       "codeStyle": "Code Style",
       "font": "Font",
       "fontSize": "Font Size",
       "spacing": "Spacing"
+    },
+    "general": {
+      "title": "General Settings",
+      "openMode": {
+        "title": "Default open mode",
+        "description": "View mode used when opening documents via double-click, drag & drop, or the Open dialog",
+        "source": "Source",
+        "split": "Split",
+        "typeset": "Typeset"
+      },
+      "defaultContent": {
+        "title": "Enable default content",
+        "description": "Automatically load the default Markdown sample content on startup; when disabled, new documents start blank",
+        "enableTip": "Enable default content",
+        "disableTip": "Disable default content"
+      }
     },
     "fontSize": {
       "unitPx": "px",

@@ -6,8 +6,6 @@ export function AddRecentFile(arg1:string,arg2:string):Promise<void>;
 
 export function ClearRecentFiles():Promise<void>;
 
-export function EmitMenuEvent(arg1:string):Promise<void>;
-
 export function ExportHTML(arg1:string,arg2:string):Promise<main.ExportHTMLResult>;
 
 export function GetAppDataDir():Promise<string>;
@@ -18,7 +16,11 @@ export function GetPlatform():Promise<string>;
 
 export function GetRecentFiles():Promise<Array<main.RecentFile>>;
 
+export function GetStartupFile():Promise<string>;
+
 export function Greet(arg1:string):Promise<string>;
+
+export function MarkFrontendReady():Promise<void>;
 
 export function OpenFileDialog():Promise<string>;
 

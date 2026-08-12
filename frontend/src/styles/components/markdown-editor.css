@@ -53,15 +53,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: var(--spacing-toolbar);
+  height: var(--spacing-toolbar);
   border: none;
   border-radius: 10px;
   background: #e8e8eb;
   color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
-  margin: 10px 0;
+  margin: 6px 0;
   box-shadow:
     5px 5px 10px rgba(163, 177, 198, 0.7),
     -5px -5px 10px rgba(255, 255, 255, 0.9);

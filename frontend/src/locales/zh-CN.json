@@ -63,12 +63,29 @@
     },
     "nav": {
       "quick": "快速导航",
+      "general": "通用",
       "themeSystem": "主题系统",
       "colorTheme": "主题色",
       "codeStyle": "代码样式",
       "font": "字体",
       "fontSize": "字号",
       "spacing": "间距"
+    },
+    "general": {
+      "title": "通用设置",
+      "openMode": {
+        "title": "默认打开方式",
+        "description": "通过双击、拖放或打开对话框等方式打开文档时使用的视图模式",
+        "source": "源码",
+        "split": "分栏",
+        "typeset": "排版"
+      },
+      "defaultContent": {
+        "title": "启用默认内容",
+        "description": "启动时自动加载默认的 Markdown 示例内容；关闭后启动将显示空白文档",
+        "enableTip": "开启默认内容",
+        "disableTip": "关闭默认内容"
+      }
     },
     "footer": {
       "apply": "应用设置"

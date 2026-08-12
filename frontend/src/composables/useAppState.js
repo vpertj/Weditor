@@ -15,6 +15,7 @@ import { useContentState } from './useContentState.js'
 import { useUIState } from './useUIState.js'
 import { useNotification } from './useNotification.js'
 import { useClipboard } from './useClipboard.js'
+import { useOpenMode } from './useOpenMode.js'
 import { EXTERNAL_LINKS } from '../config/constants/links.js'
 
 export function useAppState() {
@@ -28,6 +29,9 @@ export function useAppState() {
 
   // UI状态管理
   const uiState = useUIState()
+
+  // 默认打开方式管理
+  const openMode = useOpenMode()
 
   // 剪贴板功能 - 传入通知回调和内容获取函数
   const clipboard = useClipboard({
@@ -54,6 +58,9 @@ export function useAppState() {
     updateHtmlContent: contentState.updateHtmlContent,
     clearContent: contentState.clearContent,
     loadSample: contentState.loadSample,
+    enableDefaultContent: contentState.enableDefaultContent,
+    setDefaultContentEnabled: contentState.setDefaultContentEnabled,
+    toggleDefaultContent: contentState.toggleDefaultContent,
 
     // UI状态 (来自 useUIState)
     showSettingsPanel: uiState.showSettingsPanel,
@@ -85,6 +92,11 @@ export function useAppState() {
     copyFormatOptions: clipboard.copyFormatOptions,
     selectedCopyFormat: clipboard.selectedCopyFormat,
     handleCopyFormatSelect: clipboard.handleCopyFormatSelect,
+
+    // 默认打开方式 (来自 useOpenMode)
+    defaultOpenMode: openMode.defaultOpenMode,
+    setDefaultOpenMode: openMode.setDefaultOpenMode,
+    OPEN_MODES: openMode.OPEN_MODES,
 
     // 其他功能
     openGithub

@@ -161,7 +161,10 @@ const {
   setViewMode,
   showNotification,
   handleCopyFormatSelect,
-  openGithub
+  openGithub,
+
+  // 默认打开方式
+  defaultOpenMode
 } = useAppState()
 
 // ==========================================
@@ -174,6 +177,7 @@ const {
   newFile,
   exportHTML,
   loadStartupFile,
+  openFilePath,
   setupMenuListeners,
   setupFileDropListener,
   currentFilePath,
@@ -231,6 +235,38 @@ function handleDiscardDraft() {
 }
 
 // ==========================================
+// 默认打开方式
+// ==========================================
+// 通过系统打开（Finder 双击 / 命令行 / 拖放 / 打开对话框）文件时，
+// 切换到用户设置的默认视图模式（默认排版，可在设置中修改）
+function applyDefaultOpenMode() {
+  setViewMode(defaultOpenMode.value)
+}
+
+// ==========================================
+// Finder 双击 / Apple Events 打开文件（尽早注册，避免冷启动竞态）
+// ==========================================
+// 尽早注册 app-file-open 监听，随后通知后端前端已就绪：
+// 就绪前到达的文件事件由后端暂存，经 GetStartupFile 在启动时获取；
+// 就绪后到达的实时推送，由本监听接收。
+window.runtime?.EventsOn?.('app-file-open', async (filePath) => {
+  if (!filePath) return
+  try {
+    const result = await openFilePath(filePath)
+    if (result.success) {
+      updateMarkdownContent(result.content)
+      clearDraft()
+      applyDefaultOpenMode()
+      showNotification(`已打开: ${currentFileName.value}`, 'success')
+    } else {
+      showNotification(`无法读取文件: ${result.message}`, 'error')
+    }
+  } catch (e) {
+    showNotification(`无法读取文件: ${e.message}`, 'error')
+  }
+})
+
+// ==========================================
 // 菜单监听器
 // ==========================================
 nextTick(async () => {
@@ -257,6 +293,7 @@ nextTick(async () => {
       if (result.success) {
         updateMarkdownContent(result.content)
         clearDraft()
+        applyDefaultOpenMode()
         showNotification(`已打开: ${currentFileName.value}`, 'success')
       } else {
         showNotification(`打开失败: ${result.message}`, 'error')
@@ -322,39 +359,32 @@ nextTick(async () => {
   // 文件拖放支持
   setupFileDropListener(async (filePath) => {
     try {
-      const result = await window.go.main.App.ReadFile(filePath)
-      if (result) {
-        updateMarkdownContent(result)
+      const result = await openFilePath(filePath)
+      if (result.success) {
+        updateMarkdownContent(result.content)
         clearDraft()
-        const name = filePath.split('/').pop() || filePath
-        showNotification(`已拖放打开: ${name}`, 'success')
+        applyDefaultOpenMode()
+        showNotification(`已拖放打开: ${currentFileName.value}`, 'success')
+      } else {
+        showNotification(`无法读取文件: ${result.message}`, 'error')
       }
     } catch (e) {
       showNotification(`无法读取文件: ${e.message}`, 'error')
     }
   })
 
-  // Finder 双击 / 已运行实例通过 Apple Events 打开文件
-  window.runtime.EventsOn('app-file-open', async (filePath) => {
-    if (!filePath) return
-    try {
-      const result = await window.go.main.App.ReadFile(filePath)
-      if (result) {
-        updateMarkdownContent(result)
-        clearDraft()
-        const name = filePath.split('/').pop() || filePath
-        showNotification(`已打开: ${name}`, 'success')
-      }
-    } catch (e) {
-      showNotification(`无法读取文件: ${e.message}`, 'error')
-    }
-  })
+  // 通知后端前端已就绪：就绪后到达的文件打开事件走实时推送；
+  // 就绪前到达的已由后端暂存，经下面的 GetStartupFile 获取
+  if (window.go && window.go.main && window.go.main.App && window.go.main.App.MarkFrontendReady) {
+    try { await window.go.main.App.MarkFrontendReady() } catch (e) { console.warn('MarkFrontendReady 调用失败:', e) }
+  }
 
-  // 加载通过 Finder 双击 / 命令行打开的文件
+  // 加载通过 Finder 双击 / 命令行打开的文件（启动期后端暂存的）
   const startupResult = await loadStartupFile()
   if (startupResult && startupResult.success) {
     updateMarkdownContent(startupResult.content)
     clearDraft()
+    applyDefaultOpenMode()
     showNotification(`已打开: ${currentFileName.value}`, 'success')
   } else if (startupResult && !startupResult.success) {
     showNotification(`打开失败: ${startupResult.message}`, 'error')

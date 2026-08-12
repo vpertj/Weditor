@@ -82,6 +82,8 @@ func (a *App) MarkFrontendReady() {
 	a.frontendReady = true
 }
 
+
+
 // handleFileOpen 处理通过 Apple Events 打开的文件（Finder 双击 / 已运行实例）
 // 与 parseStartupArgs 一致：仅接受受支持的 Markdown/文本文件且文件存在
 // 若窗口上下文尚未就绪或前端尚未注册监听，则暂存，由前端启动时经 GetStartupFile 获取；否则直接推送事件

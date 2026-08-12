@@ -119,9 +119,11 @@
 </template>
 
 <script setup>
-import MarkdownEditor from '../MarkdownEditor.vue'
 import PreviewPane from '../PreviewPane.vue'
 import { ref, watch, defineAsyncComponent } from 'vue'
+// MarkdownEditor 依赖 CodeMirror（体积大）：仅「分栏/源码」模式需要，按需加载。
+// WYSIWYG 默认打开方式的用户启动时完全不加载 CodeMirror，冷启动更快
+const MarkdownEditor = defineAsyncComponent(() => import('../MarkdownEditor.vue'))
 // WysiwygPane 依赖 milkdown/prosemirror（体积大）：仅在切换到所见即所得模式时按需加载，
 // 避免拖慢首屏与双击打开速度
 const WysiwygPane = defineAsyncComponent(() => import('../WysiwygPane.vue'))
@@ -138,6 +140,11 @@ const props = defineProps({
   viewMode: {
     type: String,
     default: 'both'
+  },
+  // 文件打开计数：新文件打开时 WYSIWYG 先回退到快速预览，等待 Milkdown 同步
+  fileOpenTick: {
+    type: Number,
+    default: 0
   }
 })
 
@@ -161,12 +168,20 @@ watch(() => props.markdownContent, (val) => {
 // Milkdown 在后台预热（就绪后 emit ready），再无缝切换到所见即所得。
 // ==========================================
 const wysiwygReady = ref(false)
-const wysiwygEverMounted = ref(false)
+// 初始即可能处于所见即所得模式（启动时按默认打开方式进入），需预置挂载状态
+const wysiwygEverMounted = ref(props.viewMode === 'wysiwyg')
 
 watch(() => props.viewMode, (mode) => {
   if (mode === 'wysiwyg') {
     wysiwygEverMounted.value = true
     // 每次进入都重新走「预览 → 就绪 → 切换」流程，避免显示过期内容
+    wysiwygReady.value = false
+  }
+})
+
+// 新文件打开：WYSIWYG 模式先回退到快速预览，Milkdown 同步完成后由 ready 事件切回
+watch(() => props.fileOpenTick, () => {
+  if (props.viewMode === 'wysiwyg') {
     wysiwygReady.value = false
   }
 })

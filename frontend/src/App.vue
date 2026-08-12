@@ -29,6 +29,7 @@
           :markdown-content="markdownContent"
           :sync-scroll-enabled="syncScrollEnabled"
           :view-mode="viewMode"
+          :file-open-tick="fileOpenTick"
           @update:markdown-content="updateMarkdownContent"
           @clear-content="clearContent"
           @load-sample="loadSample"
@@ -168,6 +169,12 @@ const {
 } = useAppState()
 
 // ==========================================
+// 文件打开计数：每次打开文件 +1，通知 AppMain 在 WYSIWYG 模式下先切回快速预览
+// （避免 Milkdown 解析新文件期间显示旧文件内容）
+// ==========================================
+const fileOpenTick = ref(0)
+
+// ==========================================
 // 桌面集成 (Wails)
 // ==========================================
 const {
@@ -257,6 +264,7 @@ window.runtime?.EventsOn?.('app-file-open', async (filePath) => {
       updateMarkdownContent(result.content)
       clearDraft()
       applyDefaultOpenMode()
+      fileOpenTick.value++
       showNotification(`已打开: ${currentFileName.value}`, 'success')
     } else {
       showNotification(`无法读取文件: ${result.message}`, 'error')
@@ -294,6 +302,7 @@ nextTick(async () => {
         updateMarkdownContent(result.content)
         clearDraft()
         applyDefaultOpenMode()
+        fileOpenTick.value++
         showNotification(`已打开: ${currentFileName.value}`, 'success')
       } else {
         showNotification(`打开失败: ${result.message}`, 'error')
@@ -364,6 +373,7 @@ nextTick(async () => {
         updateMarkdownContent(result.content)
         clearDraft()
         applyDefaultOpenMode()
+        fileOpenTick.value++
         showNotification(`已拖放打开: ${currentFileName.value}`, 'success')
       } else {
         showNotification(`无法读取文件: ${result.message}`, 'error')
@@ -385,6 +395,7 @@ nextTick(async () => {
     updateMarkdownContent(startupResult.content)
     clearDraft()
     applyDefaultOpenMode()
+    fileOpenTick.value++
     showNotification(`已打开: ${currentFileName.value}`, 'success')
   } else if (startupResult && !startupResult.success) {
     showNotification(`打开失败: ${startupResult.message}`, 'error')

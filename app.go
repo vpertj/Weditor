@@ -29,6 +29,7 @@ type App struct {
 	ctx         context.Context
 	appDataDir  string
 	recentFiles []RecentFile
+	startupFile string // 通过 Finder 双击 / 命令行参数打开的文件
 }
 
 // NewApp creates a new App application struct
@@ -41,6 +42,65 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 	a.appDataDir = a.getAppDataDir()
 	a.loadRecentFiles()
+	a.parseStartupArgs()
+}
+
+// ==========================================
+// 系统打开文件（Finder 双击 / 命令行参数）
+// ==========================================
+
+// parseStartupArgs 解析启动参数，查找通过 Finder 双击或命令行打开的文件
+func (a *App) parseStartupArgs() {
+	for _, arg := range os.Args[1:] {
+		// 跳过命令行标志（如 -wails-debug）
+		if strings.HasPrefix(arg, "-") {
+			continue
+		}
+		if isMarkdownFile(arg) && fileExists(arg) {
+			a.startupFile = arg
+			return
+		}
+	}
+}
+
+// GetStartupFile 返回通过系统打开的文件路径（仅在启动时有效，取后清空）
+func (a *App) GetStartupFile() string {
+	path := a.startupFile
+	a.startupFile = ""
+	if path != "" {
+		fileName := filepath.Base(path)
+		a.addRecentFile(path, fileName)
+	}
+	return path
+}
+
+// handleFileOpen 处理通过 Apple Events 打开的文件（Finder 双击 / 已运行实例）
+// 若窗口上下文尚未就绪则暂存，由前端启动时经 GetStartupFile 获取；否则直接推送事件
+func (a *App) handleFileOpen(filePath string) {
+	if filePath == "" {
+		return
+	}
+	if a.ctx == nil {
+		a.startupFile = filePath
+		return
+	}
+	wailsRuntime.EventsEmit(a.ctx, "app-file-open", filePath)
+}
+
+// isMarkdownFile 判断文件是否为支持的 Markdown/文本类型
+func isMarkdownFile(path string) bool {
+	ext := strings.ToLower(filepath.Ext(path))
+	switch ext {
+	case ".md", ".markdown", ".mdown", ".mkd", ".txt":
+		return true
+	}
+	return false
+}
+
+// fileExists 判断文件是否存在且不是目录
+func fileExists(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && !info.IsDir()
 }
 
 // ==========================================

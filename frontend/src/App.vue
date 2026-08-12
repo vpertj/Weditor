@@ -173,6 +173,7 @@ const {
   saveFileAs,
   newFile,
   exportHTML,
+  loadStartupFile,
   setupMenuListeners,
   setupFileDropListener,
   currentFilePath,
@@ -232,7 +233,7 @@ function handleDiscardDraft() {
 // ==========================================
 // 菜单监听器
 // ==========================================
-nextTick(() => {
+nextTick(async () => {
   console.log(`🖥️ 运行平台: ${platform.value}, Wails 菜单监听器初始化`)
 
   setupMenuListeners({
@@ -332,6 +333,32 @@ nextTick(() => {
       showNotification(`无法读取文件: ${e.message}`, 'error')
     }
   })
+
+  // Finder 双击 / 已运行实例通过 Apple Events 打开文件
+  window.runtime.EventsOn('app-file-open', async (filePath) => {
+    if (!filePath) return
+    try {
+      const result = await window.go.main.App.ReadFile(filePath)
+      if (result) {
+        updateMarkdownContent(result)
+        clearDraft()
+        const name = filePath.split('/').pop() || filePath
+        showNotification(`已打开: ${name}`, 'success')
+      }
+    } catch (e) {
+      showNotification(`无法读取文件: ${e.message}`, 'error')
+    }
+  })
+
+  // 加载通过 Finder 双击 / 命令行打开的文件
+  const startupResult = await loadStartupFile()
+  if (startupResult && startupResult.success) {
+    updateMarkdownContent(startupResult.content)
+    clearDraft()
+    showNotification(`已打开: ${currentFileName.value}`, 'success')
+  } else if (startupResult && !startupResult.success) {
+    showNotification(`打开失败: ${startupResult.message}`, 'error')
+  }
 })
 
 // ==========================================

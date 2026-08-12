@@ -45,6 +45,10 @@ func main() {
 			Appearance:           mac.NSAppearanceNameDarkAqua,
 			WebviewIsTransparent: false,
 			WindowIsTranslucent:  false,
+			// 处理 Finder 双击 / 已运行实例通过 Apple Events 打开的文件
+			OnFileOpen: func(filePath string) {
+				app.handleFileOpen(filePath)
+			},
 			About: &mac.AboutInfo{
 				Title:   "WEditor",
 				Message: "现代化 Markdown 编辑器\n版本 " + APP_VERSION,

@@ -32,6 +32,12 @@ func main() {
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
+		// 启用文件拖放：原生层返回拖入文件的绝对路径，前端 OnFileDrop 打开文件。
+		// 注意：不设置 DisableWebViewDrop（会破坏编辑器内部文字拖拽）；
+		// 前端已在捕获阶段拦截 DOM 文件 drop，防止 ProseMirror 把文件当内容插入导致乱码。
+		DragAndDrop: &options.DragAndDrop{
+			EnableFileDrop: true,
+		},
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
 		OnStartup:        app.startup,
 		OnShutdown:       app.shutdown,

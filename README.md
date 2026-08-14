@@ -1,115 +1,115 @@
-# Weditor - 现代化 Markdown 编辑器
+# Weditor - Modern Markdown Editor
 
-Weditor 是一款基于 Wails 框架开发的现代化 Markdown 编辑器，提供了丰富的编辑功能和优雅的用户界面，支持实时预览、所见即所得编辑、主题定制等特性。
+Weditor is a modern Markdown editor built on the Wails framework. It offers rich editing features and an elegant user interface, with support for live preview, WYSIWYG editing, theme customization, and more.
 
-## 🚀 主要功能
+## 🚀 Key Features
 
-### 编辑功能
-- **实时预览**：编辑 Markdown 内容时实时查看渲染效果
-- **所见即所得（WYSIWYG）**：支持可视化编辑模式，无需记忆 Markdown 语法
-- **Markdown 语法指南**：内置语法参考，帮助用户快速掌握 Markdown 写作
-- **代码高亮**：支持多种编程语言的代码块高亮显示
-- **Mermaid 图表支持**：直接在编辑器中创建和渲染 Mermaid 图表
-- **丰富的工具栏**：提供常用编辑功能的快捷按钮
-  - **标题**：一级标题、二级标题、三级标题
-  - **文本格式**：粗体、斜体、删除线
-  - **链接和图片**：插入链接、插入图片
-  - **代码**：行内代码、代码块
-  - **列表和引用**：引用、无序列表、有序列表、插入表格
-  - **其他**：分割线
-- **滚动同步**：编辑区域和预览区域自动滚动同步
-- **实时内容更新**：编辑内容实时保存和更新
+### Editing
+- **Live preview**: See the rendered result in real time as you edit Markdown content
+- **WYSIWYG**: Visual editing mode with no need to memorize Markdown syntax
+- **Markdown syntax guide**: Built-in syntax reference to help you master Markdown writing quickly
+- **Code highlighting**: Syntax highlighting for code blocks in multiple programming languages
+- **Mermaid diagram support**: Create and render Mermaid diagrams directly in the editor
+- **Rich toolbar**: Shortcut buttons for common editing operations
+  - **Headings**: Heading 1, Heading 2, Heading 3
+  - **Text formatting**: Bold, italic, strikethrough
+  - **Links and images**: Insert link, insert image
+  - **Code**: Inline code, code block
+  - **Lists and quotes**: Blockquote, unordered list, ordered list, insert table
+  - **Other**: Horizontal rule
+- **Scroll sync**: Automatic scrolling sync between the editor and preview panes
+- **Real-time content updates**: Edits are saved and updated in real time
 
-### 主题与样式定制
-- **多主题支持**：内置多种颜色主题，支持明暗主题切换
-- **自定义主题**：可自定义编辑器的颜色方案
-- **字体设置**：支持调整字体类型和大小
-- **代码样式**：可选择不同的代码高亮样式
-- **间距调整**：自定义编辑器的行间距和段落间距
-- **主题系统**：支持不同的主题系统（如 Breeze 和 Default）
+### Themes & Styling
+- **Multiple themes**: Built-in color themes with light/dark mode switching
+- **Custom themes**: Customize the editor's color scheme
+- **Font settings**: Adjust font family and size
+- **Code styles**: Choose from different code highlighting styles
+- **Spacing adjustments**: Customize line spacing and paragraph spacing
+- **Theme system**: Support for different theme systems (e.g., Breeze and Default)
 
-### 用户体验
-- **响应式设计**：适配不同屏幕尺寸
-- **返回顶部按钮**：长文档编辑时快速返回顶部
-- **通知系统**：操作反馈和提示
-- **国际化支持**：支持中英文切换
-- **剪贴板管理**：增强的剪贴板功能
+### User Experience
+- **Responsive design**: Adapts to different screen sizes
+- **Back-to-top button**: Quickly return to the top when editing long documents
+- **Notification system**: Action feedback and alerts
+- **i18n support**: Switch between Chinese and English
+- **Clipboard management**: Enhanced clipboard features
 
-### 编辑器特性
-- **工具栏**：提供常用编辑功能的快捷按钮
-- **设置面板**：丰富的配置选项，可自定义编辑器行为
-- **浮动设置面板**：支持标签式设置界面
-- **颜色选择器**：直观的颜色定制工具
-- **下拉菜单**：便捷的功能访问方式
+### Editor Features
+- **Toolbar**: Shortcut buttons for common editing operations
+- **Settings panel**: Rich configuration options to customize editor behavior
+- **Floating settings panel**: Tabbed settings interface
+- **Color picker**: Intuitive color customization tool
+- **Dropdown menus**: Convenient access to features
 
-## 🛠️ 技术栈
+## 🛠️ Tech Stack
 
-### 后端
-- **Go 语言**：高性能后端开发
-- **Wails 框架**：跨平台桌面应用开发框架
+### Backend
+- **Go**: High-performance backend development
+- **Wails framework**: Cross-platform desktop application framework
 
-### 前端
-- **Vue.js 3**：现代化前端框架
-- **Vite**：快速的构建工具
-- **组合式 API**：更灵活的组件逻辑组织
-- **CSS 变量**：动态主题定制
+### Frontend
+- **Vue.js 3**: Modern frontend framework
+- **Vite**: Fast build tool
+- **Composition API**: More flexible organization of component logic
+- **CSS variables**: Dynamic theme customization
 
-### 核心库
-- **Prism.js**：代码高亮
-- **Mermaid**：图表渲染
-- **自定义 Markdown 解析器**：优化的 Markdown 处理系统
+### Core Libraries
+- **Prism.js**: Code highlighting
+- **Mermaid**: Diagram rendering
+- **Custom Markdown parser**: Optimized Markdown processing system
 
-## 📦 安装和运行
+## 📦 Installation & Running
 
-### 前置要求
-- Go 1.18+（用于后端开发）
-- Node.js 16+（用于前端开发）
-- Wails CLI（用于项目构建）
+### Prerequisites
+- Go 1.18+ (for backend development)
+- Node.js 16+ (for frontend development)
+- Wails CLI (for building the project)
 
-### 安装步骤
+### Installation Steps
 
-1. **克隆项目**
+1. **Clone the project**
    ```bash
    git clone <repository-url>
    cd Weditor
    ```
 
-2. **安装依赖**
+2. **Install dependencies**
    ```bash
-   # 安装前端依赖
+   # Install frontend dependencies
    cd frontend
    npm install
    cd ..
    
-   # 安装后端依赖
+   # Install backend dependencies
    go mod tidy
    ```
 
-3. **开发模式运行**
+3. **Run in development mode**
    ```bash
    wails dev
    ```
 
-4. **构建生产版本**
+4. **Build the production version**
    ```bash
    wails build
    ```
 
-## 📖 使用指南
+## 📖 Usage Guide
 
-### 基本编辑
-1. 在左侧编辑区域输入 Markdown 内容
-2. 右侧实时显示渲染效果
-3. 可切换到 WYSIWYG 模式进行可视化编辑
+### Basic Editing
+1. Type Markdown content in the editor pane on the left
+2. The rendered result is shown in real time on the right
+3. Switch to WYSIWYG mode for visual editing
 
-### 主题定制
-1. 点击右上角设置按钮打开设置面板
-2. 选择「颜色主题」标签页
-3. 从预设主题中选择或自定义颜色
-4. 调整字体、代码样式和间距
+### Theme Customization
+1. Click the settings button in the top-right corner to open the settings panel
+2. Select the "Color Theme" tab
+3. Choose a preset theme or customize the colors
+4. Adjust fonts, code styles, and spacing
 
-### 使用 Mermaid 图表
-1. 在编辑区域输入 Mermaid 代码块
+### Using Mermaid Diagrams
+1. Enter a Mermaid code block in the editor
    ```mermaid
    graph TD;
        A-->B;
@@ -117,89 +117,89 @@ Weditor 是一款基于 Wails 框架开发的现代化 Markdown 编辑器，提�
        B-->D;
        C-->D;
    ```
-2. 渲染后将显示交互式图表
+2. An interactive diagram will appear after rendering
 
 
-### 代码高亮
-1. 在编辑区域输入带语言标识的代码块
+### Code Highlighting
+1. Enter a code block with a language identifier in the editor
    ```javascript
    function hello() {
        console.log("Hello, Weditor!");
    }
    ```
-2. 渲染后将显示对应语言的语法高亮
+2. Syntax highlighting for the corresponding language will appear after rendering
 
-## ⚙️ 配置选项
+## ⚙️ Configuration Options
 
-### 编辑器设置
-- **字体类型**：选择编辑器使用的字体
-- **字体大小**：调整编辑区域的字体大小
-- **行间距**：设置行与行之间的间距
-- **段落间距**：设置段落之间的间距
+### Editor Settings
+- **Font family**: Choose the font used by the editor
+- **Font size**: Adjust the font size in the editing area
+- **Line spacing**: Set the spacing between lines
+- **Paragraph spacing**: Set the spacing between paragraphs
 
-### 主题设置
-- **颜色主题**：选择预设主题或自定义颜色
-- **代码样式**：选择代码高亮样式
-- **主题系统**：切换不同的主题系统
+### Theme Settings
+- **Color theme**: Choose a preset theme or customize colors
+- **Code style**: Choose a code highlighting style
+- **Theme system**: Switch between different theme systems
 
-### 界面设置
-- **语言**：切换中英文界面
-- **通知**：开启或关闭通知提示
+### Interface Settings
+- **Language**: Switch between Chinese and English
+- **Notifications**: Turn notifications on or off
 
-## 🏗️ 项目结构
+## 🏗️ Project Structure
 
 ```
 Weditor/
-├── build/              # 构建配置和资源
-├── frontend/           # 前端代码
-│   ├── src/            # 源代码
-│   │   ├── components/ # Vue 组件
-│   │   ├── composables/ # 组合式函数
-│   │   ├── config/     # 配置文件
-│   │   ├── core/       # 核心功能实现
-│   │   ├── locales/    # 国际化资源
-│   │   ├── plugins/    # 插件
-│   │   ├── shared/     # 共享工具
-│   │   └── styles/     # 样式文件
-│   └── wailsjs/        # Wails 运行时绑定
-├── app.go              # 后端应用逻辑
-├── main.go             # 应用入口
-└── wails.json          # Wails 配置
+├── build/              # Build configuration and assets
+├── frontend/           # Frontend code
+│   ├── src/            # Source code
+│   │   ├── components/ # Vue components
+│   │   ├── composables/ # Composition functions
+│   │   ├── config/     # Configuration files
+│   │   ├── core/       # Core feature implementations
+│   │   ├── locales/    # i18n resources
+│   │   ├── plugins/    # Plugins
+│   │   ├── shared/     # Shared utilities
+│   │   └── styles/     # Style files
+│   └── wailsjs/        # Wails runtime bindings
+├── app.go              # Backend application logic
+├── main.go             # Application entry point
+└── wails.json          # Wails configuration
 ```
 
-## 🤝 开发说明
+## 🤝 Development Notes
 
-### 前端开发
+### Frontend Development
 ```bash
 cd frontend
 npm run dev
 ```
 
-### 后端开发
+### Backend Development
 ```bash
-# 运行后端测试
+# Run backend tests
 go test ./...
 ```
 
-### 代码风格
-- 前端：使用 ESLint 和 Prettier 保持代码风格一致
-- 后端：遵循 Go 语言标准代码风格
+### Code Style
+- Frontend: Use ESLint and Prettier to keep code style consistent
+- Backend: Follow Go's standard code style
 
-## 📄 许可证
+## 📄 License
 
-本项目采用 MIT 许可证，详见 [LICENSE](LICENSE) 文件。
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-## 🤝 贡献
+## 🤝 Contributing
 
-欢迎提交 Issue 和 Pull Request 来改进 Weditor！
+Issues and Pull Requests are welcome to help improve Weditor!
 
-## 📞 联系方式
+## 📞 Contact
 
-如有问题或建议，欢迎通过以下方式联系：
+If you have questions or suggestions, feel free to reach out:
 
-- 提交 Issue：[GitHub Issues](<repository-issues-url>)
-- 发送邮件：<contact-email>
+- Submit an Issue: [GitHub Issues](<repository-issues-url>)
+- Send an email: <contact-email>
 
 ---
 
-**Weditor** - 让 Markdown 编辑更高效、更优雅！
+**Weditor** - Making Markdown editing more efficient and elegant!

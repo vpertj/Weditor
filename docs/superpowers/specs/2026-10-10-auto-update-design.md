@@ -76,6 +76,21 @@ CI 的 `Generate update manifest` 步骤产出并随 Release 上传：
 
 App 侧键名匹配顺序：`<GOOS>-<GOARCH>` → `darwin-universal`（macOS 回退）。该契约由 `TestManifestContract` 固定，两侧单方面改动会立刻测试失败。
 
+## 运行前提（不满足则功能整体失效）
+
+**Release 资产必须能被匿名访问。** App 不携带任何 GitHub 凭据，取清单、下产物用的都是未登录身份。
+
+- 仓库私有 → `releases/latest/download/latest.json` 返回 404、Releases API 返回 403，
+  自动更新**整体失效**（App 只会显示"检查更新失败"）。这不是降级，是完全不可用；
+  且失败是静默的（自动检查不弹错），很容易误以为功能正常。
+- 本仓库最初就是私有，发布 v1.1.0 前已改为公开。
+- 若将来必须私有：需要把清单与产物发布到任何可匿名访问的位置（公开仓库 / 对象存储 /
+  静态站点），并同步改三处——`stableManifestURL`、CI 生成清单时的资产 URL、
+  开发通道的 API 查询地址。
+
+**开发通道受 GitHub API 未认证限流**（60 次/小时/IP）。稳定通道走静态地址不受影响。
+进程内 ETag 缓存只能减少同一会话内的重复检查，每次重启仍消耗一次。
+
 ## 组件
 
 新增文件：

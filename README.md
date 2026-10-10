@@ -156,6 +156,8 @@ Pushing to `main` / `master` / `release` instead publishes a **pre-release** tag
 
 The Settings ▸ Updates tab lets you toggle automatic checks, switch between the stable and development channels, and skip a specific version.
 
+> Auto-update needs the release assets to be reachable **anonymously** — the app carries no GitHub credentials. Keep the repository public, or publish `latest.json` and the artifacts to a publicly readable location; otherwise every update check fails.
+
 > These artifacts are neither code-signed nor notarised: on macOS you still have to allow the app manually the first time, and Windows SmartScreen may warn about an unknown publisher on first run.
 
 ## ⚙️ Configuration Options

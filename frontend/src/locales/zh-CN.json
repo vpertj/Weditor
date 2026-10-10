@@ -83,12 +83,6 @@
         "title": "自动检查更新",
         "description": "启动后自动在后台检查新版本，只有发现新版本时才会提示"
       },
-      "channel": {
-        "title": "更新通道",
-        "description": "稳定版只跟随正式发布；开发版可收到每次提交的构建",
-        "stable": "稳定版",
-        "dev": "开发版"
-      },
       "viewDetail": "查看详情",
       "foundNew": "发现新版本 {version}",
       "lastCheckAt": "上次检查：{time}"

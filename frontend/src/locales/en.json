@@ -83,12 +83,6 @@
         "title": "Check for updates automatically",
         "description": "Checks quietly in the background after startup; you are only notified when a new version exists"
       },
-      "channel": {
-        "title": "Update Channel",
-        "description": "Stable follows official releases; Development receives every commit build",
-        "stable": "Stable",
-        "dev": "Development"
-      },
       "viewDetail": "View Details",
       "foundNew": "New version {version} available",
       "lastCheckAt": "Last checked: {time}"

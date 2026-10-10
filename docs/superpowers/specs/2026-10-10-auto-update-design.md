@@ -50,7 +50,8 @@ LDFLAGS    = -X main.APP_VERSION=$VERSION -X main.APP_COMMIT=$COMMIT -X main.APP
 `v1.0.0-dev-<sha>` 预发布版）。副作用与取舍：
 - 稳定通道用户每次推送后都会被提示更新，**包括坏提交**；而更新器没有回滚能力（见"关键决策"），
   逃生手段只有更新弹窗里的"跳过此版本"，或去 Releases 手动装旧版。
-- 开发通道靠 prerelease 定位，该策略下没有 prerelease，因此开发通道恒为空。
+- 开发通道靠 prerelease 定位，该策略下没有 prerelease，因此开发通道恒为空；
+  已把「更新通道」选择器从设置面板移除（Go 侧与 `useUpdater` 的通道逻辑保留，将来要用再挂回 UI）。
 - 需要发 minor / major 时手动打 tag，CI 直接采用该 tag。
 
 - `app.go`：`APP_VERSION` 由 `const` 改为 `var`，保留默认值 `1.0.0` 供本地 `wails dev` 使用；新增 `APP_COMMIT`、`APP_BUILD_TIME`

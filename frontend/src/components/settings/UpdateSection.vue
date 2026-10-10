@@ -40,27 +40,6 @@
       </button>
     </div>
 
-    <!-- 更新通道 -->
-    <div class="card-base setting-row channel-row">
-      <div class="setting-info">
-        <div class="title-secondary">{{ $t('settings.update.channel.title') }}</div>
-        <div class="description-small">{{ $t('settings.update.channel.description') }}</div>
-      </div>
-      <div class="channel-options" role="radiogroup" :aria-label="$t('settings.update.channel.title')">
-        <button
-          v-for="option in channels"
-          :key="option.value"
-          class="channel-option"
-          :class="{ active: settings.channel === option.value }"
-          role="radio"
-          :aria-checked="settings.channel === option.value"
-          @click="saveSettings({ channel: option.value })"
-        >
-          {{ $t(option.labelKey) }}
-        </button>
-      </div>
-    </div>
-
     <!-- 检查结果 / 上次检查时间 -->
     <div class="card-base result-row" v-if="resultText">
       <div class="description-small">{{ resultText }}</div>
@@ -90,11 +69,6 @@ const {
   checkForUpdate,
   saveSettings,
 } = useUpdater()
-
-const channels = [
-  { value: 'stable', labelKey: 'settings.update.channel.stable' },
-  { value: 'dev', labelKey: 'settings.update.channel.dev' },
-]
 
 const currentVersion = computed(() => `v${(buildInfo.value.version || '').replace(/^v/, '')}`)
 
@@ -163,30 +137,6 @@ const showDialog = () => {
 .action-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-/* 更新通道 */
-.channel-options {
-  display: flex;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.channel-option {
-  padding: 7px 16px;
-  border-radius: 8px;
-  border: 1px solid var(--theme-border-light);
-  background: transparent;
-  color: var(--text-secondary);
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.channel-option.active {
-  border-color: var(--theme-primary);
-  color: var(--theme-primary);
-  background: rgba(59, 130, 246, 0.08);
 }
 
 /* 结果行 */

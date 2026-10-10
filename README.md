@@ -158,7 +158,7 @@ git tag v1.2.0 && git push origin v1.2.0
 | Windows install | The running exe is renamed out of the way, the new version takes its place, and the new process is started |
 | Trigger | A quiet check five seconds after startup; the Help ▸ "Check for Updates…" menu item and the Updates tab in Settings trigger it manually |
 
-The Settings ▸ Updates tab lets you toggle automatic checks, switch between the stable and development channels, and skip a specific version. Note that the development channel looks for pre-releases, so it stays empty under the push-to-release policy above.
+The Settings ▸ Updates tab lets you toggle automatic checks, run a manual check and skip a specific version. The channel selector was removed once every push began shipping as a stable release; the development channel (which looks for pre-releases) is still implemented, just no longer exposed in the UI.
 
 > Auto-update needs the release assets to be reachable **anonymously** — the app carries no GitHub credentials. Keep the repository public, or publish `latest.json` and the artifacts to a publicly readable location; otherwise every update check fails.
 

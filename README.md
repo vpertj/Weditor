@@ -34,6 +34,7 @@ Weditor is a modern Markdown editor built on the Wails framework. It offers rich
 - **Notification system**: Action feedback and alerts
 - **i18n support**: Switch between Chinese and English
 - **Clipboard management**: Enhanced clipboard features
+- **Auto-update**: Checks for new versions after startup; download, replacement and restart in one click (macOS / Windows), with stable and development channels
 
 ### Editor Features
 - **Toolbar**: Shortcut buttons for common editing operations
@@ -129,6 +130,34 @@ Weditor is a modern Markdown editor built on the Wails framework. It offers rich
    ```
 2. Syntax highlighting for the corresponding language will appear after rendering
 
+## 🔄 Releases & Auto-Update
+
+### Publishing a new version
+
+```bash
+git tag v1.1.0 && git push origin v1.1.0
+```
+
+CI builds all three platforms in parallel and additionally generates a `latest.json` update manifest (download URL and sha256 for every platform's artifact), which is uploaded alongside the Release. Installed clients detect the new version and prompt on their next launch.
+
+Pushing to `main` / `master` / `release` instead publishes a **pre-release** tagged `v1.0.0-dev-<sha>`; only clients switched to the "Development" channel will see it.
+
+### How auto-update works
+
+| Stage | Implementation |
+|---|---|
+| Version source | The git tag is injected at build time via `-ldflags -X`, and synchronised into the macOS plist and the Windows version resource |
+| Discovery | The stable channel reads `releases/latest/download/latest.json` (a static URL that costs no GitHub API quota); the development channel asks the Releases API for the most recently published build |
+| Newer or older | The stable channel compares semver; the development channel compares publish times, because dev versions look like `v1.0.0-dev-<sha>` and cannot be ordered by version number |
+| Integrity | sha256 is computed while streaming the download and compared with the manifest — a mismatch is discarded at once, and the file is verified again right before installing |
+| macOS install | `ditto` extracts the archive; a detached script then waits for the app to exit, swaps in the whole `.app` bundle and relaunches it |
+| Windows install | The running exe is renamed out of the way, the new version takes its place, and the new process is started |
+| Trigger | A quiet check five seconds after startup; the Help ▸ "Check for Updates…" menu item and the Updates tab in Settings trigger it manually |
+
+The Settings ▸ Updates tab lets you toggle automatic checks, switch between the stable and development channels, and skip a specific version.
+
+> These artifacts are neither code-signed nor notarised: on macOS you still have to allow the app manually the first time, and Windows SmartScreen may warn about an unknown publisher on first run.
+
 ## ⚙️ Configuration Options
 
 ### Editor Settings
@@ -164,6 +193,9 @@ Weditor/
 │   └── wailsjs/        # Wails runtime bindings
 ├── app.go              # Backend application logic
 ├── main.go             # Application entry point
+├── version.go          # Version parsing and comparison
+├── updater.go          # Auto-update: manifest fetch / download / verification / orchestration
+├── updater_apply_*.go  # Per-platform install (darwin / windows / other)
 └── wails.json          # Wails configuration
 ```
 

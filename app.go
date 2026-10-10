@@ -12,9 +12,14 @@ import (
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
-const (
-	APP_NAME    = "WEditor"
-	APP_VERSION = "1.0.0"
+const APP_NAME = "WEditor"
+
+// 版本信息：由 CI 构建时通过 -ldflags -X main.XXX 注入。
+// 保留默认值，使 wails dev / 本地 wails build 也能正常工作。
+var (
+	APP_VERSION    = "1.0.0"
+	APP_COMMIT     = "dev"
+	APP_BUILD_TIME = ""
 )
 
 // RecentFile 最近打开的文件信息
@@ -44,6 +49,9 @@ func (a *App) startup(ctx context.Context) {
 	a.appDataDir = a.getAppDataDir()
 	a.loadRecentFiles()
 	a.parseStartupArgs()
+	// 清理上次更新留下的临时文件（更新失败时残留的下载片段/旧程序）
+	a.cleanupUpdatesDir()
+	cleanupPlatformArtifacts()
 }
 
 // ==========================================
@@ -301,6 +309,24 @@ func (a *App) ExportHTML(htmlContent string, defaultName string) ExportHTMLResul
 // GetAppVersion 返回应用版本
 func (a *App) GetAppVersion() string {
 	return APP_VERSION
+}
+
+// BuildInfo 构建信息，关于页与更新器共用
+type BuildInfo struct {
+	Version   string `json:"version"`
+	Commit    string `json:"commit"`
+	BuildTime string `json:"buildTime"`
+	Platform  string `json:"platform"`
+}
+
+// GetBuildInfo 返回完整构建信息
+func (a *App) GetBuildInfo() BuildInfo {
+	return BuildInfo{
+		Version:   APP_VERSION,
+		Commit:    APP_COMMIT,
+		BuildTime: APP_BUILD_TIME,
+		Platform:  a.GetPlatform(),
+	}
 }
 
 // GetAppDataDir 返回应用数据目录

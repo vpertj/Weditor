@@ -103,12 +103,15 @@
       @close="closeAbout"
     />
 
+    <!-- 自动更新弹窗 -->
+    <UpdateDialog />
+
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import { useAppState, useWails, usePlatform, useAutoSave, useWindowDrag } from './composables/index.js'
+import { useAppState, useWails, usePlatform, useAutoSave, useWindowDrag, useUpdater } from './composables/index.js'
 import { useGlobalThemeManager } from './composables/index.js'
 import { nextTick } from 'vue'
 import AppHeader from './components/layout/AppHeader.vue'
@@ -117,6 +120,7 @@ import AppFooter from './components/layout/AppFooter.vue'
 import SettingsPanel from './components/SettingsPanel.vue'
 import MarkdownGuide from './components/MarkdownGuide.vue'
 import AboutDialog from './components/AboutDialog.vue'
+import UpdateDialog from './components/UpdateDialog.vue'
 import BackToTopFloat from './components/BackToTopFloat.vue'
 
 // ==========================================
@@ -220,6 +224,11 @@ const {
   currentFilePath,
   currentFileName
 } = useWails()
+
+// ==========================================
+// 自动更新
+// ==========================================
+const { initUpdater, checkForUpdate } = useUpdater()
 
 // ==========================================
 // 自动保存
@@ -378,6 +387,7 @@ nextTick(async () => {
     onToggleSettings: () => toggleSettingsPanel(),
     onShowGuide: () => showGuide(),
     onShowAbout: () => showAbout(),
+    onCheckUpdate: () => checkForUpdate(true),
 
     // 导出 HTML
     onExportHTML: async () => {
@@ -415,6 +425,9 @@ nextTick(async () => {
 
   // 通知后端前端已就绪：就绪后到达的文件打开事件走实时推送；
   // 就绪前到达的已由后端暂存，经下面的 GetStartupFile 获取
+  // 启动静默检查更新：延迟执行，不阻塞启动
+  await initUpdater()
+
   if (window.go && window.go.main && window.go.main.App && window.go.main.App.MarkFrontendReady) {
     try { await window.go.main.App.MarkFrontendReady() } catch (e) { console.warn('MarkFrontendReady 调用失败:', e) }
   }

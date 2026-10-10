@@ -302,6 +302,7 @@ export function useWails() {
    * @param {Function} callbacks.onShowGuide - 显示指南
    * @param {Function} callbacks.onExportHTML - 导出 HTML
    * @param {Function} callbacks.onShowAbout - 关于
+   * @param {Function} callbacks.onCheckUpdate - 检查更新
    */
   const setupMenuListeners = (callbacks = {}) => {
     if (!isWails.value) {
@@ -323,6 +324,7 @@ export function useWails() {
       'menu-show-guide': callbacks.onShowGuide,
       'menu-export-html': callbacks.onExportHTML,
       'menu-show-about': callbacks.onShowAbout,
+      'menu-check-update': callbacks.onCheckUpdate,
     }
 
     Object.entries(eventMap).forEach(([eventName, callback]) => {

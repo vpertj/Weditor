@@ -32,3 +32,6 @@ export { useWindowDrag } from './useWindowDrag.js';
 
 // 为向后兼容性保留的别名导出
 export { useEditor as useMarkdownEditor } from './editor/index.js';
+
+// 自动更新（检查/下载/替换重启）
+export { useUpdater } from './useUpdater.js';

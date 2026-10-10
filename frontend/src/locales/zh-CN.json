@@ -70,7 +70,28 @@
       "codeStyle": "代码样式",
       "font": "字体",
       "fontSize": "字号",
-      "spacing": "间距"
+      "spacing": "间距",
+      "updates": "自动更新"
+    },
+    "update": {
+      "title": "自动更新",
+      "currentVersion": "当前版本",
+      "localBuild": "本地构建",
+      "checkNow": "立即检查",
+      "checking": "正在检查…",
+      "autoCheck": {
+        "title": "自动检查更新",
+        "description": "启动后自动在后台检查新版本，只有发现新版本时才会提示"
+      },
+      "channel": {
+        "title": "更新通道",
+        "description": "稳定版只跟随正式发布；开发版可收到每次提交的构建",
+        "stable": "稳定版",
+        "dev": "开发版"
+      },
+      "viewDetail": "查看详情",
+      "foundNew": "发现新版本 {version}",
+      "lastCheckAt": "上次检查：{time}"
     },
     "general": {
       "title": "通用设置",
@@ -221,6 +242,30 @@
     "social": "公众号格式",
     "markdown": "MD 格式"
   },
+  "update": {
+    "checking": "正在检查更新…",
+    "upToDate": "当前已是最新版本",
+    "noUpdate": "检查更新",
+    "unknownError": "检查更新失败",
+    "checkFailed": "检查更新失败",
+    "manualHint": "你也可以到 GitHub Releases 页面手动下载安装。",
+    "restartHint": "更新会重启应用；未保存的编辑已自动存为草稿，重启后可恢复。",
+    "publishedAt": "发布时间",
+    "packageSize": "安装包大小",
+    "notes": "更新说明",
+    "skipVersion": "跳过此版本",
+    "later": "稍后",
+    "revealFile": "打开下载目录",
+    "openReleasePage": "打开发布页面",
+    "checkAgain": "重新检查",
+    "downloadAndInstall": "下载并安装",
+    "installNow": "立即安装并重启",
+    "installing": "正在安装并重启…",
+    "downloading": "正在下载新版本",
+    "readyToInstall": "下载完成，可以安装",
+    "newVersionFound": "发现新版本"
+  },
+
   "about": {
     "title": "关于 WEditor",
     "subtitle": "现代化的 Markdown 编辑器",

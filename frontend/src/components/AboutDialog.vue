@@ -37,7 +37,7 @@
                 <div class="info-list">
                   <div class="info-item">
                     <div class="info-label">{{ $t('about.version') }}</div>
-                    <div class="info-value">v1.0.0</div>
+                    <div class="info-value">{{ versionText }}</div>
                   </div>
 
                   <div class="info-item">
@@ -47,7 +47,7 @@
 
                   <div class="info-item">
                     <div class="info-label">{{ $t('about.buildDate') }}</div>
-                    <div class="info-value">{{ new Date().toLocaleDateString() }}</div>
+                    <div class="info-value">{{ buildDateText }}</div>
                   </div>
 
                   <div class="info-item">
@@ -128,6 +128,8 @@
 </template>
 
 <script>
+import { useUpdater } from '../composables/useUpdater.js'
+
 export default {
   name: 'AboutDialog',
   props: {
@@ -137,6 +139,23 @@ export default {
     }
   },
   emits: ['close'],
+  setup() {
+    // 版本与构建时间都取自被注入的构建信息，不再写死
+    const { buildInfo } = useUpdater()
+    return { buildInfo }
+  },
+  computed: {
+    versionText() {
+      const version = (this.buildInfo?.version || '').replace(/^v/, '')
+      return version ? `v${version}` : '-'
+    },
+    buildDateText() {
+      const raw = this.buildInfo?.buildTime
+      if (!raw) return '-'
+      const date = new Date(raw)
+      return Number.isNaN(date.getTime()) ? raw : date.toLocaleDateString()
+    }
+  },
   methods: {
     close() {
       this.$emit('close')

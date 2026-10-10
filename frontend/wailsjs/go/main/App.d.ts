@@ -4,7 +4,13 @@ import {main} from '../models';
 
 export function AddRecentFile(arg1:string,arg2:string):Promise<void>;
 
+export function ApplyUpdateAndRestart():Promise<void>;
+
+export function CheckForUpdate(arg1:boolean):Promise<main.UpdateInfo>;
+
 export function ClearRecentFiles():Promise<void>;
+
+export function DownloadUpdate():Promise<main.UpdateResult>;
 
 export function ExportHTML(arg1:string,arg2:string):Promise<main.ExportHTMLResult>;
 
@@ -12,11 +18,15 @@ export function GetAppDataDir():Promise<string>;
 
 export function GetAppVersion():Promise<string>;
 
+export function GetBuildInfo():Promise<main.BuildInfo>;
+
 export function GetPlatform():Promise<string>;
 
 export function GetRecentFiles():Promise<Array<main.RecentFile>>;
 
 export function GetStartupFile():Promise<string>;
+
+export function GetUpdateSettings():Promise<main.UpdateSettings>;
 
 export function Greet(arg1:string):Promise<string>;
 
@@ -24,8 +34,16 @@ export function MarkFrontendReady():Promise<void>;
 
 export function OpenFileDialog():Promise<string>;
 
+export function OpenUpdateDownloadPage():Promise<void>;
+
 export function ReadFile(arg1:string):Promise<string>;
+
+export function RevealUpdateFile():Promise<string>;
 
 export function SaveFile(arg1:string,arg2:string):Promise<void>;
 
 export function SaveFileDialog(arg1:string):Promise<string>;
+
+export function SetUpdateSettings(arg1:main.UpdateSettings):Promise<main.UpdateSettings>;
+
+export function SkipVersion(arg1:string):Promise<main.UpdateSettings>;

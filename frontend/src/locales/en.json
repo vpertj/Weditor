@@ -70,7 +70,28 @@
       "codeStyle": "Code Style",
       "font": "Font",
       "fontSize": "Font Size",
-      "spacing": "Spacing"
+      "spacing": "Spacing",
+      "updates": "Updates"
+    },
+    "update": {
+      "title": "Automatic Updates",
+      "currentVersion": "Current Version",
+      "localBuild": "Local build",
+      "checkNow": "Check Now",
+      "checking": "Checking…",
+      "autoCheck": {
+        "title": "Check for updates automatically",
+        "description": "Checks quietly in the background after startup; you are only notified when a new version exists"
+      },
+      "channel": {
+        "title": "Update Channel",
+        "description": "Stable follows official releases; Development receives every commit build",
+        "stable": "Stable",
+        "dev": "Development"
+      },
+      "viewDetail": "View Details",
+      "foundNew": "New version {version} available",
+      "lastCheckAt": "Last checked: {time}"
     },
     "general": {
       "title": "General Settings",
@@ -222,6 +243,30 @@
     "social": "WeChat Official Account format",
     "markdown": "Markdown"
   },
+  "update": {
+    "checking": "Checking for updates…",
+    "upToDate": "You are on the latest version",
+    "noUpdate": "Check for Updates",
+    "unknownError": "Update check failed",
+    "checkFailed": "Update check failed",
+    "manualHint": "You can also download and install manually from the GitHub Releases page.",
+    "restartHint": "Updating restarts the app; unsaved edits are kept as a draft and can be restored after restart.",
+    "publishedAt": "Published",
+    "packageSize": "Package size",
+    "notes": "Release notes",
+    "skipVersion": "Skip this version",
+    "later": "Later",
+    "revealFile": "Show downloaded file",
+    "openReleasePage": "Open release page",
+    "checkAgain": "Check again",
+    "downloadAndInstall": "Download and install",
+    "installNow": "Install and restart",
+    "installing": "Installing and restarting…",
+    "downloading": "Downloading new version",
+    "readyToInstall": "Download complete, ready to install",
+    "newVersionFound": "New version available"
+  },
+
   "about": {
     "title": "About WEditor",
     "subtitle": "Modern Markdown Editor",

@@ -172,6 +172,10 @@ func buildAppMenu(app *App) *menu.Menu {
 
 	// ===== 帮助菜单 =====
 	helpMenu := appMenu.AddSubmenu("帮助")
+	helpMenu.AddText("检查更新...", nil, func(cd *menu.CallbackData) {
+		runtime.EventsEmit(app.ctx, "menu-check-update")
+	})
+	helpMenu.AddSeparator()
 	helpMenu.AddText("关于 WEditor", nil, func(cd *menu.CallbackData) {
 		runtime.EventsEmit(app.ctx, "menu-show-about")
 	})

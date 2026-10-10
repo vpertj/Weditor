@@ -6,8 +6,20 @@ export function AddRecentFile(arg1, arg2) {
   return window['go']['main']['App']['AddRecentFile'](arg1, arg2);
 }
 
+export function ApplyUpdateAndRestart() {
+  return window['go']['main']['App']['ApplyUpdateAndRestart']();
+}
+
+export function CheckForUpdate(arg1) {
+  return window['go']['main']['App']['CheckForUpdate'](arg1);
+}
+
 export function ClearRecentFiles() {
   return window['go']['main']['App']['ClearRecentFiles']();
+}
+
+export function DownloadUpdate() {
+  return window['go']['main']['App']['DownloadUpdate']();
 }
 
 export function ExportHTML(arg1, arg2) {
@@ -22,6 +34,10 @@ export function GetAppVersion() {
   return window['go']['main']['App']['GetAppVersion']();
 }
 
+export function GetBuildInfo() {
+  return window['go']['main']['App']['GetBuildInfo']();
+}
+
 export function GetPlatform() {
   return window['go']['main']['App']['GetPlatform']();
 }
@@ -32,6 +48,10 @@ export function GetRecentFiles() {
 
 export function GetStartupFile() {
   return window['go']['main']['App']['GetStartupFile']();
+}
+
+export function GetUpdateSettings() {
+  return window['go']['main']['App']['GetUpdateSettings']();
 }
 
 export function Greet(arg1) {
@@ -46,8 +66,16 @@ export function OpenFileDialog() {
   return window['go']['main']['App']['OpenFileDialog']();
 }
 
+export function OpenUpdateDownloadPage() {
+  return window['go']['main']['App']['OpenUpdateDownloadPage']();
+}
+
 export function ReadFile(arg1) {
   return window['go']['main']['App']['ReadFile'](arg1);
+}
+
+export function RevealUpdateFile() {
+  return window['go']['main']['App']['RevealUpdateFile']();
 }
 
 export function SaveFile(arg1, arg2) {
@@ -56,4 +84,12 @@ export function SaveFile(arg1, arg2) {
 
 export function SaveFileDialog(arg1) {
   return window['go']['main']['App']['SaveFileDialog'](arg1);
+}
+
+export function SetUpdateSettings(arg1) {
+  return window['go']['main']['App']['SetUpdateSettings'](arg1);
+}
+
+export function SkipVersion(arg1) {
+  return window['go']['main']['App']['SkipVersion'](arg1);
 }

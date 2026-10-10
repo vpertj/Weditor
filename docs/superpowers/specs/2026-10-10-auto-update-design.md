@@ -36,11 +36,22 @@ WEditor 此前没有任何版本检测机制：`app.go` 里 `APP_VERSION` 是写
 **构建期注入**（`build.yml`）：
 
 ```
-VERSION    = tag 名（如 v1.4.2）或 v1.0.0-dev-<sha>
+VERSION    = 推 tag 时用 tag 名（如 v1.4.2）；推分支时取现有最高 vX.Y.Z 的补丁号 +1
 NUMERIC    = VERSION 去掉 -后缀 的数值部分（macOS plist / Windows 版本资源要求 x.y.z）
 COMMIT, BUILD_TIME = git short sha / UTC RFC3339
 LDFLAGS    = -X main.APP_VERSION=$VERSION -X main.APP_COMMIT=$COMMIT -X main.APP_BUILD_TIME=$BUILD_TIME
 ```
+
+**版本号由独立的 `version` job 统一计算**（2026-10-10 起）：三个构建平台与 release 共用同一个结果，
+避免各算各的；工作流加了 `concurrency` 串行化，否则连推两次会算出同一个"下一版本号"而撞车。
+计算时只认纯 `x.y.z` 的正式 tag，历史 `-dev-<sha>` 预发布 tag 不参与，否则补丁号基数会被带偏。
+
+**发布策略（2026-10-10 变更）**：推送 `main` 即自动递增补丁号并发布**正式版**（此前是发
+`v1.0.0-dev-<sha>` 预发布版）。副作用与取舍：
+- 稳定通道用户每次推送后都会被提示更新，**包括坏提交**；而更新器没有回滚能力（见"关键决策"），
+  逃生手段只有更新弹窗里的"跳过此版本"，或去 Releases 手动装旧版。
+- 开发通道靠 prerelease 定位，该策略下没有 prerelease，因此开发通道恒为空。
+- 需要发 minor / major 时手动打 tag，CI 直接采用该 tag。
 
 - `app.go`：`APP_VERSION` 由 `const` 改为 `var`，保留默认值 `1.0.0` 供本地 `wails dev` 使用；新增 `APP_COMMIT`、`APP_BUILD_TIME`
 - `wails.json → info.productVersion` 与 `build/darwin/Info.plist` 的 `CFBundleVersion`/`CFBundleShortVersionString` 同步为 `NUMERIC`

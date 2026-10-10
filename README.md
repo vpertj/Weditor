@@ -134,13 +134,17 @@ Weditor is a modern Markdown editor built on the Wails framework. It offers rich
 
 ### Publishing a new version
 
+**Every push to `main` publishes a release.** CI resolves the version first — it takes the highest existing `vX.Y.Z` tag and increments the patch — then builds all three platforms, generates a `latest.json` update manifest (download URL and sha256 for each artifact) and publishes it. Installed clients detect it and prompt on their next launch.
+
 ```bash
-git tag v1.1.0 && git push origin v1.1.0
+# Push to main → automatically publishes v1.1.1, v1.1.2, …
+git push origin main
+
+# To cut a minor or major version, push a tag instead and CI uses it as-is
+git tag v1.2.0 && git push origin v1.2.0
 ```
 
-CI builds all three platforms in parallel and additionally generates a `latest.json` update manifest (download URL and sha256 for every platform's artifact), which is uploaded alongside the Release. Installed clients detect the new version and prompt on their next launch.
-
-Pushing to `main` / `master` / `release` instead publishes a **pre-release** tagged `v1.0.0-dev-<sha>`; only clients switched to the "Development" channel will see it.
+> Because every push ships straight to stable users, a broken commit reaches them on their next launch, and the updater has no rollback. "Skip this version" in the update dialog is the escape hatch.
 
 ### How auto-update works
 
@@ -154,7 +158,7 @@ Pushing to `main` / `master` / `release` instead publishes a **pre-release** tag
 | Windows install | The running exe is renamed out of the way, the new version takes its place, and the new process is started |
 | Trigger | A quiet check five seconds after startup; the Help ▸ "Check for Updates…" menu item and the Updates tab in Settings trigger it manually |
 
-The Settings ▸ Updates tab lets you toggle automatic checks, switch between the stable and development channels, and skip a specific version.
+The Settings ▸ Updates tab lets you toggle automatic checks, switch between the stable and development channels, and skip a specific version. Note that the development channel looks for pre-releases, so it stays empty under the push-to-release policy above.
 
 > Auto-update needs the release assets to be reachable **anonymously** — the app carries no GitHub credentials. Keep the repository public, or publish `latest.json` and the artifacts to a publicly readable location; otherwise every update check fails.
 

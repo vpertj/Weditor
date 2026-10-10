@@ -8,9 +8,51 @@ on:
     branches: [ main, master, release ]
     tags: [ 'v*.*.*' ]
 
+# 同一分支的发布串行执行：否则两次快速推送会同时算出同一个"下一版本号"而撞车
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
+  # 统一算一次版本号，三个平台和 release 共用，避免各自算出不同结果。
+  # - 推 tag：直接用 tag（发 minor/major 版本走这条路）
+  # - 推分支：取现有最高正式版本 vX.Y.Z，补丁号 +1 —— 推送即发布
+  version:
+    name: Resolve version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.resolve.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Resolve version
+        id: resolve
+        shell: bash
+        run: |
+          LATEST=""
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            VERSION="${{ github.ref_name }}"
+          else
+            # 只认纯 x.y.z 的正式 tag：-dev-<sha> 之类的历史预发布 tag 不参与计算，
+            # 否则补丁号的基数会被它们带偏。
+            # 末尾 `|| true` 必需：没有匹配时 grep 返回 1，在 bash -e 下会让整步失败
+            LATEST=$(git tag -l | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1 || true)
+            if [ -z "$LATEST" ]; then
+              VERSION="v1.0.0"
+            else
+              VERSION="v$(echo "${LATEST#v}" | awk -F. '{printf "%d.%d.%d", $1, $2, $3 + 1}')"
+            fi
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "本次发布版本: $VERSION（现有最高正式 tag: ${LATEST:-无}）"
+
   build:
     name: Build for ${{ matrix.os }}
+    needs: version
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -49,16 +91,8 @@ jobs:
       - name: Install Wails CLI
         run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
 
-      - name: Set version number
-        id: version
-        run: |
-          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
-            VERSION=${{ github.ref_name }}
-          else
-            VERSION="v1.0.0-dev-$(git rev-parse --short HEAD)"
-          fi
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+      - name: Use resolved version
+        run: echo "VERSION=${{ needs.version.outputs.version }}" >> "$GITHUB_ENV"
         shell: bash
 
       - name: Compute build metadata
@@ -228,7 +262,7 @@ jobs:
           path: build/bin/*
 
   release:
-    needs: build
+    needs: [build, version]
     if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
@@ -246,18 +280,15 @@ jobs:
       - name: Set release information
         id: release_info
         run: |
-          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
-            TAG_NAME=${{ github.ref_name }}
-            RELEASE_NAME="Release ${{ github.ref_name }}"
-            PRERELEASE=false
-          else
-            TAG_NAME="v1.0.0-dev-$(git rev-parse --short HEAD)"
-            RELEASE_NAME="Pre-release from ${{ github.ref_name }} branch"
-            PRERELEASE=true
-          fi
-          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
-          echo "RELEASE_NAME=$RELEASE_NAME" >> $GITHUB_ENV
-          echo "PRERELEASE=$PRERELEASE" >> $GITHUB_ENV
+          # 版本号来自 version job；分支推送同样发正式版，所以 PRERELEASE 恒为 false。
+          # tag 不存在时 action-gh-release 会按当前提交自动创建（用 GITHUB_TOKEN
+          # 创建 tag 不会再次触发本工作流，不会形成循环）。
+          TAG_NAME="${{ needs.version.outputs.version }}"
+          echo "TAG_NAME=$TAG_NAME" >> "$GITHUB_ENV"
+          echo "RELEASE_NAME=Release ${TAG_NAME}" >> "$GITHUB_ENV"
+          echo "PRERELEASE=false" >> "$GITHUB_ENV"
+          echo "本次发布: Release ${TAG_NAME}"
+        shell: bash
 
       - name: Rename build artifacts
         run: |

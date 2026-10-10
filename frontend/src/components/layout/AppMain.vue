@@ -1,7 +1,5 @@
 <template>
   <main class="app-main" :class="`view-mode-${viewMode}`">
-    <!-- 窗口顶部拖拽条：覆盖 .app-main 顶部 padding 空白区，实现整条顶部可拖拽移动窗口 -->
-    <div class="window-drag-strip" aria-hidden="true"></div>
     <!-- 左侧：Markdown编辑器 -->
     <div v-if="viewMode === 'both' || viewMode === 'editor'" class="editor-panel">
       <div class="panel-header">
@@ -196,18 +194,6 @@ watch(() => props.fileOpenTick, () => {
   overflow: hidden;
   background: #f5f5f5;
   position: relative;
-}
-
-/* 窗口顶部拖拽条：仅覆盖顶部 padding 空白区域（32px），不遮挡面板头部按钮 */
-.window-drag-strip {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: var(--spacing-4xl);
-  -webkit-app-region: drag;
-  z-index: 50;
-  /* 透明无内容，仅作为窗口拖拽区域；不设 pointer-events:none，否则拖拽命中失效 */
 }
 
 .editor-panel,

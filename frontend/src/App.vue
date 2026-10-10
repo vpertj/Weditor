@@ -1,6 +1,9 @@
 <template>
   <div id="app">
     <div class="app-container">
+      <!-- 顶部整宽拖拽条：横跨左侧竖栏，双击切换窗口最大化让内容铺满屏幕 -->
+      <div class="window-drag-strip" aria-hidden="true"></div>
+
       <!-- 左侧应用头部 -->
       <AppHeader
         :show-settings-panel="showSettingsPanel"
@@ -489,6 +492,18 @@ const handleFileChosen = async (e) => {
 @import './styles/components/notifications.css';
 
 /* 水平布局 */
+/* 顶部整宽拖拽条：fixed 定位才能横跨左侧竖栏；z-index 须低于各类弹窗（1000+） */
+.window-drag-strip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--spacing-4xl);
+  -webkit-app-region: drag;
+  z-index: 50;
+  /* 透明无内容，仅作拖拽/双击区域；不设 pointer-events:none，否则拖拽命中失效 */
+}
+
 .app-container {
   display: flex;
   height: 100vh;
